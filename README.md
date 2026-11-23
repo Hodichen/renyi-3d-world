@@ -1,4 +1,4 @@
-# 三重漫遊 交接說明（V51｜2026/11/23）
+# 三重漫遊 交接說明（V52｜2026/11/23）
 
 一個 3D 開放世界遊戲（GTA 風格），用 Three.js r128 寫成，整個遊戲在 index.html 一個檔案裡（目前約 4600 行）。
 地點：新北市三重 仁義街 → 五華國小，照真實街景 1:1 重現。
@@ -38,6 +38,8 @@
 
 
 ## 版本歷程與部署
+- **V52（2026/11/23）**：以 CC0 速克達與城市腳踏車的 GLB 模型替換原本程序建模外觀；保留 `makeScooter`/`makeBike` 的騎乘及碰撞資料、E 鍵上下車、WASD、騎士坐姿。新增固定停放的腳踏車（含出生點附近），路上 AI 同樣換模型。模型透過原版 Three.js r128 `GLTFLoader` 從 3DAssets.dev 的永久 CDN 載入（無須 KTX2/Draco/Meshopt）；網路失敗自動維持舊外觀。程式參考：`V52_ASSET_SOURCES`、`v52SetupVehicle`、`v52LoadBikeModels`、`v52WheelTick`。模型僅替換外觀，不應重寫車輛物理或人物 RIG。
+
 - **V51（2026/11/23）**：起始畫面顯示版本及更新日期；原創霓虹電影片頭、3D 街景運鏡與原創 Web Audio 電子配樂。點「▶ 播放電影片頭」開始有聲動畫；因瀏覽器禁止自動播放有聲音，須由玩家點擊啟動；可略過、關閉音樂，開始遊戲後配樂淡出。片頭版本在 `GAME_META` 管理，更新時同時修改畫面版本與日期。
 - **V50（2026/11/23）**：仁義街路邊轎車、E 鍵上下車、加速駕駛；簡化行人／機車／腳踏車碰撞受傷與恢復；台灣時間、Open-Meteo 三重附近即時天氣。為輕量遊戲模擬，非完整真實剛體物理。
 - GitHub Pages 正式測試入口：https://hodichen.github.io/renyi-3d-world/
@@ -47,3 +49,13 @@
 - 配樂完全由 Web Audio API 即時合成，沒有使用外部版權音樂；音訊在按「▶ 播放電影片頭」或「♫ 音樂：關」後啟用。
 - 建議測試：電腦 Chrome、手機/iPad Safari 的有聲播放、略過、開始漫遊是否正常；注意低功耗裝置的 3D 畫面與音效效能。
 - 本版已做 JavaScript 語法檢查；不等同完成跨裝置實際遊玩驗收。
+
+## V52 免費 3D 模型來源
+- 通勤速克達：https://3dassets.dev/assets/motorcycle-racing-and-street-bikes-commuter-scooter-6889697c
+  - GLB：https://cdn.3dassets.dev/assets/15431/v1/model.glb
+- 城市腳踏車（綠）：https://3dassets.dev/assets/japanese-school-and-city-street-bicycle-commuter-d3ed9187
+  - GLB：https://cdn.3dassets.dev/assets/30073/v1/model.glb
+- 城市腳踏車（紅）：https://3dassets.dev/assets/japanese-school-and-city-street-bicycle-commuter-red-a66398c4
+  - GLB：https://cdn.3dassets.dev/assets/30074/v1/model.glb
+- 三者皆 CC0 1.0；可商業使用，不需署名。直接 CDN 載入會依賴外部服務，日後可自行下載 GLB 存入專案後改為相對路徑，降低斷線風險。
+- 驗收：Chrome/iPad 載入後檢查車體朝向、車輪動畫、E 鍵上下車、玩家騎乘、AI 行車及撞擊翻車；語法檢查通過不代表實際瀏覽器測試完成。
