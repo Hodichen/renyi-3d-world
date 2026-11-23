@@ -126,6 +126,15 @@ button:focus-visible{outline:2px solid var(--on);outline-offset:2px}
 .xpPop{position:fixed;left:50%;top:32%;transform:translateX(-50%);font-size:24px;font-weight:900;color:#ffd166;text-shadow:0 2px 10px rgba(0,0,0,.7);pointer-events:none;z-index:30;animation:xpUp 1.6s ease-out forwards}
 @keyframes xpUp{0%{opacity:0;transform:translate(-50%,10px)}15%{opacity:1}100%{opacity:0;transform:translate(-50%,-50px)}}
 #lvBtn .xpt{display:block;font-size:11.5px;opacity:.85;margin-top:1px;font-variant-numeric:tabular-nums}
+
+/* V50 cinematic title inspired by neon-sunset action trailers; original art, no third-party soundtrack */
+#intro{background:linear-gradient(90deg,rgba(15,8,34,.91),rgba(24,12,50,.57) 45%,rgba(17,16,35,.09) 80%),linear-gradient(0deg,rgba(7,5,29,.83),rgba(221,83,132,.14) 65%,rgba(255,178,100,.16))!important}
+.ttName{color:#fff0e3!important;text-shadow:4px 4px 0 #ef6e99,8px 8px 0 #68359b,0 0 30px #ff74b680!important}
+.ttSeal{background:linear-gradient(145deg,#fc6991,#7841b0)!important;outline-color:#fd80aa!important}
+.ttSub{color:#fbc5db!important;letter-spacing:2.8px!important}
+.ttMenu button:hover,.ttMenu button:focus{border-left-color:#fa7bad!important;background:rgba(255,108,174,.14)!important}
+body.titleOn #v50WeatherHUD{display:none}
+@media(max-width:760px){#v50WeatherHUD{top:auto!important;bottom:calc(183px + env(safe-area-inset-bottom,0px))!important;max-width:50vw!important;font-size:10px!important}}
 </style>
 <div id="loc" class="chip"><b>仁義街</b><span>新北市三重區</span></div>
 <div id="fx">
@@ -193,7 +202,7 @@ button:focus-visible{outline:2px solid var(--on);outline-offset:2px}
   <button class="btn" id="helpClose">繼續逛</button>
 </div></div>
 <div id="intro"><div class="tt">
-  <div class="ttLogo"><div class="ttSeal">三<br>重</div><div><div class="ttName">漫遊</div><div class="ttSub">SANCHONG&nbsp;STROLL ・ 仁義街 → 五華國小</div></div></div>
+  <div class="ttLogo"><div class="ttSeal">三<br>重</div><div><div class="ttName">漫遊</div><div class="ttSub">SANCHONG AFTERGLOW ・ 仁義街 × 五華國小</div></div></div>
   <div class="ttMenu">
    <button id="ttStart" disabled><b>開始漫遊</b><i>START</i><em id="loading">建造街道中…</em></button>
    <button id="ttDesign" disabled><b>設計角色</b><i>CHARACTER</i></button>
@@ -1937,6 +1946,8 @@ for(const v of vehicles.filter(v=>v.ai)){for(let tries=0;tries<40;tries++){const
 function parked(v,x,z,h){addVehicle(v,x,z,h,false);v.parked=true;return v;}
 const MOUTHS=ALLEYS.map(a=>a.z);
 for(const[a,b]of MAIN_L){for(let z=a+6;z<b-6;z+=R(14,26)){if(MOUTHS.some(m=>Math.abs(m-z)<5))continue;parked(makeCar(pick(CAR_COLS)),-4.3,z,0);}}
+// V50: eight easy-to-find sedans on the east curb of Renyi St, away from intersections.
+for(const z of[-163,-143,-103,-75,-27,35,77,108]){if([FR_Z,BI_Z,TH_Z].some(i=>Math.abs(z-i)<8))continue;parked(makeCar(pick(CAR_COLS)),4.35,z,Math.PI);}
 for(const[a,b]of MAIN_L){for(let z=a+2;z<b-2;z+=R(3,10)){if(MOUTHS.some(m=>Math.abs(m-z)<4))continue;if(rnd()<0.45)parked(makeScooter(pick(SC_COLS)),-8.1,z,Math.PI/2+R(-.15,.15));}}
 for(const[a,b]of MAIN_R.slice(1)){for(let z=a+4;z<b-4;z+=8.5){if(rnd()<0.4)parked(makeScooter(pick(SC_COLS)),8.8,z+R(-1,1),-Math.PI/2+R(-.2,.2));}}
 for(let i=0;i<5;i++)parked(makeBike('#f2b705'),57.2,-171+i*1.9,-Math.PI/2);
@@ -2707,7 +2718,7 @@ function applyPreset(){const p=PRESETS[ST.tod];ST.night=p.night;
  scene.fog.color.copy(fogC);scene.background.copy(fogC);scene.fog.near=p.fogN*(ST.rain?0.6:1);scene.fog.far=p.fogF*(ST.rain?0.7:1);
  if(ST.rain&&ST.tod==='day'){sky.material.uniforms.top.value.set('#7d8996');sky.material.uniforms.bot.value.set('#a9b2ba');}
  hemi.color.set(p.hs);hemi.groundColor.set(p.hg);hemi.intensity=p.hemi*(ST.rain&&ST.tod==='day'?0.92:1);
- sun.color.set(p.sun);sun.intensity=p.sunI*(ST.rain?0.35:1);SUN_OFF.set(...p.dir);
+ sun.color.set(p.sun);sun.intensity=p.sunI*(ST.rain?0.35:1)*(1-((typeof V50_REAL!=='undefined'&&V50_REAL.auto)?V50_REAL.cloud:0)*.5);SUN_OFF.set(...p.dir);
  U_LIT.value=p.lit;
  for(const{m,k}of NIGHT_EMI)m.emissive.setScalar(k*Math.max(0,p.night-0.05));
  LAMP_WARM.color.set(p.night>0.3?'#ffd9a0':'#c9c3b5');LAMP_LED.color.set(p.night>0.3?'#f2f6ff':'#cfd3d6');
@@ -2799,7 +2810,7 @@ const helpEl=document.getElementById('help');
 function toggleHelp(force){const show=force!==undefined?force:helpEl.style.display!=='flex';helpEl.style.display=show?'flex':'none';}
 document.getElementById('helpBtn').addEventListener('click',()=>toggleHelp(true));document.getElementById('helpClose').addEventListener('click',()=>toggleHelp(false));
 helpEl.querySelectorAll('[data-tp]').forEach(b=>b.addEventListener('click',()=>{teleport(+b.dataset.tp);toggleHelp(false);}));
-document.querySelectorAll('[data-tod]').forEach(b=>b.addEventListener('click',()=>{ST.tod=b.dataset.tod;applyPreset();}));
+document.querySelectorAll('[data-tod]').forEach(b=>b.addEventListener('click',()=>{V50_REAL.auto=false;ST.tod=b.dataset.tod;applyPreset();v50Clock();}));
 // ===== 角色設計 =====
 const DOPTS=[
  {k:'body',l:'角色',v:['M','SUIT'],t:['學生','西裝']},
@@ -2937,7 +2948,7 @@ function designCam(dt){const h=AV.h;const t=tmpV.set(PL.pos.x,PL.pos.y+0.92*h,PL
  const want=t.clone().addScaledVector(dir,d);camPos.lerp(want,Math.min(1,dt*6));camera.position.copy(camPos);
  const look=t.clone();if(wide){look.x+=fz*0.8*h*DESIGN.z;look.z-=fx*0.8*h*DESIGN.z;}else look.y-=0.8*h*DESIGN.z;camera.lookAt(look);
  player.g.visible=true;sky.position.copy(camera.position);sun.position.copy(t).add(SUN_OFF);sun.target.position.copy(t);rainMat.uniforms.uC.value.copy(camera.position);}
-bRain.addEventListener('click',()=>{ST.rain=!ST.rain;applyPreset();});bBloom.addEventListener('click',()=>{ST.bloom=!ST.bloom;applyPreset();});bFilm.addEventListener('click',()=>{ST.film=!ST.film;applyPreset();});
+bRain.addEventListener('click',()=>{V50_REAL.auto=false;ST.rain=!ST.rain;applyPreset();v50Clock();});bBloom.addEventListener('click',()=>{ST.bloom=!ST.bloom;applyPreset();});bFilm.addEventListener('click',()=>{ST.film=!ST.film;applyPreset();});
 bSound.addEventListener('click',()=>{ST.sound=!ST.sound;initAudio();if(AC&&AC.state==='suspended')AC.resume();applyPreset();updateAudio(0);});
 
 // =====================================================================
@@ -3009,6 +3020,122 @@ function drawMap(){const W=mapCv.width,sc=1.1;const px=PL.pos.x,pz=PL.pos.z;
 // =====================================================================
 //  更新
 // =====================================================================
+
+/* V50: low-cost street collision & non-graphic injury layer.
+   Respects existing rigBuild/npcRigUpdate/allRigTick/carRigUpdate/CARLIST. */
+const V50_PHYS={pedHits:0,vehicleHits:0};
+function v50Impact(v,imp){
+ if(!v||imp<3||time-(v._v50HitAt??-100)<1.4)return;
+ v._v50HitAt=time;V50_PHYS.vehicleHits++;
+ if(v.type==='scooter'||v.type==='bike'){
+  v._v50FallUntil=time+Math.min(7,2.4+imp*.26);
+  v._v50Lean=(Math.sin(time+v.h)>0?1:-1)*(imp>9?1.16:.72);v.speed=0;
+  if(PL.veh===v){exitVehicle();toast('撞擊！機車／腳踏車倒地',2);}
+ }else{v.speed*=imp>10?.28:.53;if(PL.veh===v)toast('碰撞，車速下降',1.5);}
+}
+function v50LineDist(x,z,ax,az,bx,bz){
+ const dx=bx-ax,dz=bz-az,t=Math.max(0,Math.min(1,((x-ax)*dx+(z-az)*dz)/(dx*dx+dz*dz||1)));
+ return Math.hypot(x-(ax+t*dx),z-(az+t*dz));
+}
+function v50PhysicsTick(dt){
+ // Every part of the map uses the same collision rules while near the player.
+ const active=vehicles.filter(v=>(!v.ai||v.active)&&v.g.visible&&Math.abs(v.pos.x-PL.pos.x)<75&&Math.abs(v.pos.z-PL.pos.z)<75);
+ for(const v of active){
+  if(v._v50FallUntil>time){v.speed=0;v.g.rotation.z+=(v._v50Lean-v.g.rotation.z)*Math.min(1,dt*8);}
+  else if(v._v50Lean){v.g.rotation.z*=Math.max(0,1-dt*3);if(Math.abs(v.g.rotation.z)<.03){v.g.rotation.z=0;v._v50Lean=0;}}
+  const old=v._v50Prev;
+  if(!old){v._v50Prev={x:v.pos.x,z:v.pos.z};continue;}
+  const moved=Math.hypot(v.pos.x-old.x,v.pos.z-old.z);
+  if(moved>20){old.x=v.pos.x;old.z=v.pos.z;continue;} // ignore distant AI respawns
+  if(Math.abs(v.speed)>2.2&&!(v._v50FallUntil>time)){
+   for(const p of peds){
+    if(!p.c.g.visible||p._v50Injury&&p._v50Injury.until>time)continue;
+    const x=p.c.g.position.x,z=p.c.g.position.z;
+    if(Math.abs(x-v.pos.x)>6+moved||Math.abs(z-v.pos.z)>6+moved)continue;
+    if(v50LineDist(x,z,old.x,old.z,v.pos.x,v.pos.z)>(v.type==='car'?1.75:1.05))continue;
+    if(time-(p._v50LastHit??-100)<8)continue;
+    const impact=Math.abs(v.speed),dur=impact<5?2.4:impact<11?5.2:8.2;
+    const push=Math.min(2.1,impact*.14),ix=x+Math.sin(v.h)*push,iz=z+Math.cos(v.h)*push;
+    p._v50LastHit=time;p._v50Injury={start:time,until:time+dur,x:ix,z:iz,angle:(Math.sin(p.t+time)>0?1:-1)*Math.min(1.12,.36+impact*.056),normal:p.sp};
+    p.pause=Math.max(p.pause,dur);p.sp*=.6;v.speed*=impact>9?.43:.7;V50_PHYS.pedHits++;
+    if(v===PL.veh)toast(impact<5?'行人受傷、踉蹌後退':'行人跌倒受傷，附近路人驚嚇閃避',2.4);
+    for(const q of peds)if(q!==p&&q.c.g.visible&&Math.hypot(q.c.g.position.x-x,q.c.g.position.z-z)<6){q.pause=Math.max(q.pause,1.3+Math.random()*2);q.latV+=(Math.random()>.5?1:-1)*2.5;}
+    break;
+   }
+  }
+  old.x=v.pos.x;old.z=v.pos.z;
+ }
+ // Car/scooter/bicycle against other moving or parked vehicles; rate-limited.
+ for(const a of active){
+  if(Math.abs(a.speed)<2||a._v50FallUntil>time)continue;
+  for(const b of active){
+   if(a===b||Math.abs(a.pos.x-b.pos.x)>3.7||Math.abs(a.pos.z-b.pos.z)>3.7)continue;
+   const dist=Math.hypot(a.pos.x-b.pos.x,a.pos.z-b.pos.z);
+   const minD=(a.type==='car'?1.6:.7)+(b.type==='car'?1.6:.7);
+   if(dist>=minD||dist<.02)continue;
+   const rel=Math.hypot(Math.sin(a.h)*a.speed-Math.sin(b.h)*b.speed,Math.cos(a.h)*a.speed-Math.cos(b.h)*b.speed);
+   if(rel<3||time-(a._v50HitAt??-100)<1.4||time-(b._v50HitAt??-100)<1.4)continue;
+   v50Impact(a,rel);v50Impact(b,rel);break;
+  }
+ }
+ // Injury animation: fall, remain hurt, stand slowly, limp briefly. No blood/death.
+ for(const p of peds){
+  const e=p._v50Injury;if(!e)continue;
+  if(time>=e.until){
+   p.c.g.rotation.z*=Math.max(0,1-dt*6);
+   if(Math.abs(p.c.g.rotation.z)<.035){p.c.g.rotation.z=0;p.sp=e.normal*.8;p._v50Injury=null;}
+  }else{
+   const fall=Math.min(1,(time-e.start)/.3,(e.until-time)/.95),lean=e.angle*Math.max(0,fall);
+   p.c.g.rotation.z=lean;
+   p.c.g.position.set(e.x,groundY(e.x,e.z)+Math.abs(lean)*.17,e.z);
+  }
+ }
+}
+
+
+/* V50: real Sanchong clock and live near-Sanchong weather (Open-Meteo).
+   School period simulation is intentionally independent of real-world time. */
+const V50_REAL={auto:true,weather:'連線中',updated:'',code:null,cloud:0};
+const v50TimeTW=new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',hour:'2-digit',minute:'2-digit',hour12:false,month:'2-digit',day:'2-digit'});
+const v50HourTW=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Taipei',hour:'2-digit',hourCycle:'h23'});
+const v50WeatherHUD=document.createElement('button');
+v50WeatherHUD.id='v50WeatherHUD';v50WeatherHUD.type='button';v50WeatherHUD.title='點擊恢復三重即時時間與天氣';
+v50WeatherHUD.style.cssText='position:fixed;left:12px;top:151px;z-index:9;border:1px solid #ffffff44;background:rgba(14,16,30,.75);border-radius:12px;padding:8px 11px;color:white;cursor:pointer;font:600 12px system-ui;backdrop-filter:blur(7px);max-width:260px;text-align:left;line-height:1.5';
+document.body.appendChild(v50WeatherHUD);
+function v50Clock(){
+ const now=new Date();
+ if(V50_REAL.auto){
+  const hour=Number(v50HourTW.format(now));
+  const tod=hour>=18||hour<5?'night':hour>=16?'dusk':'day';
+  if(ST.tod!==tod){ST.tod=tod;applyPreset();}
+ }
+ v50WeatherHUD.textContent='📍 三重 '+v50TimeTW.format(now)+'｜'+V50_REAL.weather+(V50_REAL.auto?'（即時）':'（手動場景）');
+}
+async function v50WeatherFetch(){
+ try{
+  const addr='https://api.open-meteo.com/v1/forecast?latitude=25.08&longitude=121.49&current=weather_code,precipitation,rain,cloud_cover&timezone=Asia%2FTaipei&forecast_days=1';
+  const res=await fetch(addr,{cache:'no-store',signal:typeof AbortSignal.timeout==='function'?AbortSignal.timeout(9500):undefined});
+  if(!res.ok)throw Error('status '+res.status);
+  const cur=(await res.json()).current;
+  if(!cur||typeof cur.weather_code!=='number')throw Error('empty');
+  const w=cur.weather_code,wet=cur.precipitation>.05||cur.rain>.05||(w>=51&&w<=67)||(w>=80&&w<=82)||w>=95;
+  const label=wet?'下雨':w===0?'晴朗':w<=2?'晴時多雲':w===3?'陰天':w===45||w===48?'有霧':'多雲';
+  V50_REAL.weather=label;V50_REAL.updated=cur.time;V50_REAL.code=w;V50_REAL.cloud=Math.max(0,Math.min(1,(cur.cloud_cover||0)/100));
+  if(V50_REAL.auto&&ST.rain!==wet){ST.rain=wet;applyPreset();}
+  else if(V50_REAL.auto&&ST.tod==='day')applyPreset();
+  try{sessionStorage.setItem('renyi_live_weather',JSON.stringify({stamp:Date.now(),label,wet,cloud:V50_REAL.cloud}));}catch(_){}
+ }catch(_){
+  try{
+   const cached=JSON.parse(sessionStorage.getItem('renyi_live_weather')||'null');
+   if(cached&&Date.now()-cached.stamp<3600000){V50_REAL.weather=cached.label+'（快取）';V50_REAL.cloud=cached.cloud;if(V50_REAL.auto){ST.rain=cached.wet;applyPreset();}}
+   else V50_REAL.weather='氣象暫無資料';
+  }catch(_){V50_REAL.weather='氣象暫無資料';}
+ }
+ v50Clock();
+}
+v50WeatherHUD.onclick=()=>{V50_REAL.auto=true;v50Clock();v50WeatherFetch();};
+setInterval(v50Clock,60000);setInterval(v50WeatherFetch,600000);
+
 const raycaster=new THREE.Raycaster();const tmpV=new THREE.Vector3(),tmpV2=new THREE.Vector3();
 function inputVec(){let ix=0,iy=0;if(keys.KeyD||keys.ArrowRight)ix+=1;if(keys.KeyA||keys.ArrowLeft)ix-=1;if(keys.KeyW||keys.ArrowUp)iy+=1;if(keys.KeyS||keys.ArrowDown)iy-=1;ix+=joy.x;iy+=joy.y;return[clamp(ix,-1,1),clamp(iy,-1,1)];}
 function angLerp(a,b,t){let d=b-a;while(d>Math.PI)d-=Math.PI*2;while(d<-Math.PI)d+=Math.PI*2;return a+d*t;}
@@ -3023,21 +3150,22 @@ function updatePlayer(dt){if(BATTLE)return;if(AIM){updateAim(dt);return;}if(DESI
   PL.vy-=24*dt;PL.pos.y+=PL.vy*dt;if(PL.pos.y<=gy){PL.pos.y=gy;PL.vy=0;PL.onGround=true;}
   player.g.position.copy(PL.pos);player.g.rotation.y=PL.rot;animWalk(player,sp,dt);if(sp<0.1){player.legs[0].rotation.x*=0.8;player.legs[1].rotation.x*=0.8;player.arms[0].rotation.x*=0.8;}
   if(!PL.onGround){player.legs[0].rotation.x=-0.5;player.legs[1].rotation.x=0.3;}
- }else{const v=PL.veh;const thr=iy,steer=ix;const acc=v.type==='car'?7:v.type==='scooter'?6:3.5;const max=v.type==='car'?22:v.type==='scooter'?16:7;
-  if(thr>0.05)v.speed+=acc*thr*dt*(v.speed<0?2.5:1);else if(thr<-0.05)v.speed+=(v.speed>0.5?-14:-acc*0.6)*(-thr)*dt;else v.speed*=Math.pow(0.55,dt);
+ }else{const v=PL.veh;const thr=iy,steer=ix;const acc=v.type==='car'?12:v.type==='scooter'?6:3.5;const max=v.type==='car'?(PL.run||keys.ShiftLeft||keys.ShiftRight?38:30):v.type==='scooter'?16:7;
+  if(v._v50FallUntil>time)v.speed=0;else if(thr>0.05)v.speed+=acc*thr*dt*(v.speed<0?2.5:1);else if(thr<-0.05)v.speed+=(v.speed>0.5?-14:-acc*0.6)*(-thr)*dt;else v.speed*=Math.pow(0.55,dt);
   if(keys.Space)v.speed*=Math.pow(0.05,dt);v.speed=clamp(v.speed,-max*0.3,max);
-  const turn=(v.type==='car'?1.5:2.0)*clamp(Math.abs(v.speed)/4,0,1)*Math.sign(v.speed);v.h-=steer*turn*dt;
+  const turn=v._v50FallUntil>time?0:(v.type==='car'?1.5:2.0)*clamp(Math.abs(v.speed)/4,0,1)*Math.sign(v.speed);v.h-=steer*turn*dt;
   v.pos.x+=Math.sin(v.h)*v.speed*dt;v.pos.z+=Math.cos(v.h)*v.speed*dt;
   const fx=Math.sin(v.h),fz=Math.cos(v.h);const off=v.type==='car'?1.25:0.5;const rr=v.type==='car'?0.95:0.4;let hit=false;
   for(const s of[1,-1]){const c={x:v.pos.x+fx*off*s,z:v.pos.z+fz*off*s};const bx=c.x,bz=c.z;if(resolveCircle(c,rr)){v.pos.x+=c.x-bx;v.pos.z+=c.z-bz;hit=true;}}
   for(const o of vehicles){if(o===v||(!o.active&&o.ai))continue;const dx=v.pos.x-o.pos.x,dz=v.pos.z-o.pos.z;const d=Math.hypot(dx,dz);const md=(v.type==='car'?1.6:0.8)+(o.type==='car'?1.6:0.6);if(d<md&&d>0.01){v.pos.x+=dx/d*(md-d);v.pos.z+=dz/d*(md-d);hit=true;}}
-  if(hit)v.speed*=0.5;
+  if(hit){const collisionSpeed=Math.abs(v.speed);v.speed*=.5;v50Impact(v,collisionSpeed);}
   v.pos.y=groundY(v.pos.x,v.pos.z);v.g.position.copy(v.pos);v.g.rotation.y=v.h;v.g.rotation.z=v.type!=='car'?-steer*clamp(v.speed/10,0,1)*0.25:0;
   for(const w of v.wheels)w.rotation.x+=v.speed*dt/v.wr;
   if(v.type==='bike'){player.phase+=v.speed*dt*2;player.legs[0].rotation.x=-1.45+Math.sin(player.phase)*0.5;player.legs[1].rotation.x=-1.45-Math.sin(player.phase)*0.5;}
   PL.pos.set(v.pos.x,v.pos.y,v.pos.z);PL.rot=v.h;}}
 function updateAI(dt,camP){const plv=PL.veh;
  for(const v of vehicles){if(!v.ai)continue;
+  if(v._v50FallUntil>time){v.speed=0;continue;}
   if(!v.active){v.respawn=(v.respawn||0)-dt;if(v.respawn>0)continue;const pi=pickPath();const p=PATHS[pi];pathSample(p,0,tmpS);
    if(Math.hypot(tmpS.x-camP.x,tmpS.z-camP.z)<95){v.respawn=0.5;continue;}if(vehicles.some(o=>o!==v&&(o.active||!o.ai)&&Math.hypot(o.pos.x-tmpS.x,o.pos.z-tmpS.z)<12)){v.respawn=0.7;continue;}placeOnPath(v,pi,0);continue;}
   const fx=Math.sin(v.h),fz=Math.cos(v.h);let target=v.max*(ST.rain?0.85:1);const look=8+v.speed*1.6;
@@ -3108,7 +3236,7 @@ let last=performance.now(),frame=0,time=0,started=false,perfT=0,perfN=0,perfDone
 function loop(now){requestAnimationFrame(loop);const dt=Math.min(0.05,(now-last)/1000);last=now;time+=dt;frame++;liftRestore();
  if(started){updatePlayer(dt);updateBattle(dt);}if(typeof rigTick==='function')rigTick(dt);if(!started&&typeof titleCam==='function')titleCam(dt);
  const camP=camera.position;
- updateAI(dt,camP);updatePeds(dt,camP,frame);updateSchool(dt,camP,time);updateXinbei(dt,time,camP);updateInteract(dt);for(let i=0;i<(window.__LIFE_X||1);i++)updateSchoolLife(dt,time);updateCamera(dt);updateLightFX(camP,frame);
+ updateAI(dt,camP);updatePeds(dt,camP,frame);if(started)v50PhysicsTick(dt);updateSchool(dt,camP,time);updateXinbei(dt,time,camP);updateInteract(dt);for(let i=0;i<(window.__LIFE_X||1);i++)updateSchoolLife(dt,time);updateCamera(dt);updateLightFX(camP,frame);
  rainMat.uniforms.uT.value=time;if(finalPass)finalPass.uniforms.uTime.value=time;
  for(const c of idlers)c.head.rotation.y=Math.sin(time*0.5+c.phase)*0.4;
  if(frame%3===0){drawMap();const[a,b]=locationName(PL.pos.x,PL.pos.z);if(locEl.dataset.k!==a+b){locEl.dataset.k=a+b;locEl.innerHTML=`<b>${a}</b><span>${b}</span>`;}
@@ -4423,14 +4551,15 @@ for(const id of['ttStart','ttDesign','ttDay'])document.getElementById(id).disabl
 // ===== 主畫面：三重漫遊（夜景、慢慢繞著仁義街與五華國小飛） =====
 {const TIPS=['仁義街走到底就是五華國小的仁義門','進安公園裡有七夕走鵲橋，可以去找找','騎機車記得戴安全帽，晚上路燈下比較安全','六藝樓圓形穿堂的樓梯可以走上二樓教室','上課時間在校園亂晃，小心被學務主任抓到','下雨天路面濕滑，騎車慢一點','圓形穿堂的白鹿壁畫是五華國小的招牌'];
  const tp=document.getElementById('ttTip');let ti=0;const nextTip=()=>{tp.textContent=TIPS[ti++%TIPS.length];};nextTip();setInterval(nextTip,5200);
- window.TTL={on:true,t:0};document.body.classList.add('titleOn');ST.tod='night';ST.rain=true;applyPreset();document.querySelectorAll('[data-tod]').forEach(b=>b.classList.toggle('on',b.dataset.tod==='night'));
+ window.TTL={on:true,t:0};document.body.classList.add('titleOn');v50Clock();v50WeatherFetch();
  const close=(fn)=>{TTL.on=false;document.body.classList.remove('titleOn');FREECAM=null;document.getElementById('intro').classList.add('gone');setTimeout(()=>document.getElementById('intro').style.display='none',600);started=true;if(fn)fn();else cv.focus();};
  document.getElementById('ttStart').onclick=()=>close();
  document.getElementById('ttDesign').onclick=()=>close(()=>openDesigner());
  document.getElementById('ttHelp').onclick=()=>{const h=document.getElementById('ttHelpBox');h.style.display=h.style.display==='block'?'none':'block';};
- document.getElementById('ttDay').onclick=()=>{ST.tod='day';ST.rain=false;applyPreset();document.querySelectorAll('[data-tod]').forEach(b=>b.classList.toggle('on',b.dataset.tod==='day'));close();};}
+ document.getElementById('ttDay').onclick=()=>{V50_REAL.auto=false;ST.tod='day';ST.rain=false;applyPreset();document.querySelectorAll('[data-tod]').forEach(b=>b.classList.toggle('on',b.dataset.tod==='day'));close();};}
 function titleCam(dt){if(!window.TTL||!TTL.on)return;TTL.t+=dt;const a=TTL.t*0.045;const cx=0,cz=-230,r=150;FREECAM=[[cx+Math.cos(a)*r,62+Math.sin(TTL.t*0.1)*6,cz+Math.sin(a)*r],[cx,4,cz]];}
 
+window.__v50={physics:V50_PHYS,weather:V50_REAL,refreshWeather:v50WeatherFetch};
 window.__dbg={aim:()=>({startAim,aimStop,get AIM(){return AIM;},DIR,WALLET,SCHED}),battle:()=>({startBattle,get B(){return BATTLE;},PROF,leaveBattle,openSkills}),v6:()=>({HOOPS,BIRDS,BB,peKids,DOGS,IDLE_DOGS,setCarry,get CARRY(){return CARRY;}}),design:()=>({openDesigner,closeDesigner,AV,DOGS,IDLE_DOGS,OSTAFF,SWINGS,zoomBy,get player(){return player;}}),life:()=>({SCHED,WALLET,INTERACT,allKids,classrooms,toggleVehicle,nearestInteract}),top:(x0,z0,x1,z1,W,H)=>{const oc=new THREE.OrthographicCamera(x0,x1,-z0,-z1,1,900);oc.position.set(0,600,0);oc.up.set(0,0,-1);oc.lookAt(0,0,0);oc.position.set(0,600,0);const f=scene.fog;scene.fog=null;sky.visible=false;rain.visible=false;const sc=sun.shadow.camera;const old=[sc.left,sc.right,sc.top,sc.bottom];sc.left=-260;sc.right=260;sc.top=320;sc.bottom=-320;sc.updateProjectionMatrix();sun.position.set(-70+(x0+x1)/2,300,60+(z0+z1)/2);sun.target.position.set((x0+x1)/2,0,(z0+z1)/2);for(const p of peds)p.c.g.visible=true;renderer.setPixelRatio(1);renderer.setSize(W,H);renderer.render(scene,oc);const url=renderer.domElement.toDataURL('image/png');scene.fog=f;sky.visible=true;return url;},free:(a,b)=>{FREECAM=a?[a,b]:null;},teleport,PL,ST,applyPreset,info:()=>renderer.info.render,setCam:(y,p,d)=>{camYaw=y;camPitch=p;camDist=d;},start:()=>{document.getElementById('intro').style.display='none';started=true;if(window.TTL)TTL.on=false;},vehicles,ALLEYS,composer:()=>!!composer,counts:()=>({colliders:colliders.length,lights:LIGHTS.length,blockers:blockers.length,meshes:S.children.length})};
 </script>
 
