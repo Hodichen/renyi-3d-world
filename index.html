@@ -263,7 +263,7 @@ border:1px solid #ffb8d9;color:#fff;background:#1b132eaa;padding:11px 16px;borde
  <div id="ttFilmCaption" aria-live="polite"></div>
  <button id="ttSkip" type="button">略過片頭 ›</button>
  <div class="tt">
-  <div id="ttBuild"><span class="mini">CURRENT BUILD ・ 三重漫遊</span><strong id="ttBuildVersion">V55</strong><span class="date" id="ttBuildDate">更新日期｜2026/11/23</span></div>
+  <div id="ttBuild"><span class="mini">CURRENT BUILD ・ 三重漫遊</span><strong id="ttBuildVersion">V56</strong><span class="date" id="ttBuildDate">更新日期｜2026/11/23</span></div>
   <div class="ttLogo"><div class="ttSeal">三<br>重</div><div><div class="ttName">漫遊</div><div class="ttSub">SANCHONG AFTERGLOW ・ 仁義街 × 五華國小</div></div></div>
   <div class="ttMenu">
    <button id="ttStart" disabled><b>開始漫遊</b><i>START</i><em id="loading">建造街道中…</em></button>
@@ -2051,7 +2051,9 @@ function v52SetupVehicle(v){
  body.updateMatrixWorld(true);
  let bb=new THREE.Box3().setFromObject(body),sz=bb.getSize(new THREE.Vector3());
  const v53LengthOnX=sz.x>sz.z*1.3;
- if(v53LengthOnX){body.rotation.y=Math.PI/2;body.updateMatrixWorld(true);}
+ // The CC0 bicycle's front axle is at +X; game forward is +Z.
+ // Use -90 degrees: +X -> +Z. The previous +90 faced backwards.
+ if(v53LengthOnX){body.rotation.y=-Math.PI/2;body.updateMatrixWorld(true);}
  bb.setFromObject(body);sz=bb.getSize(new THREE.Vector3());
  if(!(sz.z>0.2)||!Number.isFinite(sz.z))return;
  const nominal=v.type==='scooter'?1.82:1.72;
@@ -4855,7 +4857,7 @@ for(const id of['ttStart','ttDesign','ttDay'])document.getElementById(id).disabl
  * Audio starts ONLY after a user click (browser autoplay policy).
  * No licensed tracks or external media files.
  */
-const GAME_META={version:'V55',updated:'2026/11/23',feature:'騎士坐姿校正／停車避障／破面真車暫停顯示'};
+const GAME_META={version:'V56',updated:'2026/11/23',feature:'腳踏車車頭方向修正／保留V55騎士與車輛修正'};
 window.GAME_META=GAME_META;
 document.getElementById('ttBuildVersion').textContent=GAME_META.version;
 document.getElementById('ttBuildDate').textContent='更新日期｜'+GAME_META.updated;
@@ -4941,7 +4943,7 @@ function v51PlayFilm(){
   [450,'這裡，是我們的城市'],
   [3200,'仁義街・每個街角都有故事'],
   [6050,'五華國小・每天都有新冒險'],
-  [8750,'三重漫遊  V55']];
+  [8750,'三重漫遊  V56']];
  for(const [delay,title] of captions){
   V51_FILM.handles.push(setTimeout(()=>{
    if(!V51_FILM.active)return;
