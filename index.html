@@ -263,7 +263,7 @@ border:1px solid #ffb8d9;color:#fff;background:#1b132eaa;padding:11px 16px;borde
  <div id="ttFilmCaption" aria-live="polite"></div>
  <button id="ttSkip" type="button">略過片頭 ›</button>
  <div class="tt">
-  <div id="ttBuild"><span class="mini">CURRENT BUILD ・ 三重漫遊</span><strong id="ttBuildVersion">V51</strong><span class="date" id="ttBuildDate">更新日期｜2026/11/23</span></div>
+  <div id="ttBuild"><span class="mini">CURRENT BUILD ・ 三重漫遊</span><strong id="ttBuildVersion">V52</strong><span class="date" id="ttBuildDate">更新日期｜2026/11/23</span></div>
   <div class="ttLogo"><div class="ttSeal">三<br>重</div><div><div class="ttName">漫遊</div><div class="ttSub">SANCHONG AFTERGLOW ・ 仁義街 × 五華國小</div></div></div>
   <div class="ttMenu">
    <button id="ttStart" disabled><b>開始漫遊</b><i>START</i><em id="loading">建造街道中…</em></button>
@@ -1938,7 +1938,7 @@ function makeScooter(color){const g=new THREE.Group();const bm=M(color);
  const parts=[[.46,.42,1.1,0,.55,-.15,bm],[.38,.1,.6,0,.32,.2,M('#2a2a2a')],[.48,.85,.14,0,.72,.56,bm],[.4,.12,.72,0,.84,-.28,M('#202020')],[.7,.05,.05,0,1.18,.5,M('#333')],[.18,.12,.08,0,1.0,.64,HEAD_M],[.24,.08,.06,0,.75,-.72,TAIL_M]];
  for(const[w,h,d,x,y,z,m]of parts){const p=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);p.position.set(x,y,z);p.castShadow=true;g.add(p);}
  const wheels=[];for(const z of[.62,-.62]){const w=new THREE.Mesh(G_SWHEEL,M('#1b1b1b'));w.position.set(0,.25,z);g.add(w);wheels.push(w);}
- return {g,wheels,type:'scooter',hl:.95,hw:.35,max:12,wr:.25,seat:[0,.5,-.22],lf:.7,lh:1.0};}
+ return {g,wheels,type:'scooter',hl:.95,hw:.35,max:12,wr:.25,seat:[0,.5,-.22],lf:.7,lh:1.0,_v52Fallback:[...g.children]};}
 function makeBike(color){const g=new THREE.Group();const fm=new THREE.MeshStandardMaterial({color,roughness:.35,metalness:.4}),dk=M('#1b1b1b'),cr=new THREE.MeshStandardMaterial({color:'#c9ced2',roughness:.25,metalness:.8});
  const tube=(a,b,r,m)=>{const A=new THREE.Vector3(...a),B=new THREE.Vector3(...b),L=A.distanceTo(B);const t=new THREE.Mesh(new THREE.CylinderGeometry(r,r,L,8),m);t.position.copy(A).add(B).multiplyScalar(.5);t.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),B.clone().sub(A).normalize());t.castShadow=true;g.add(t);return t;};
  const BB=[0,.34,-.02],ST=[0,.86,-.2],HT=[0,.9,.36],HB=[0,.62,.42],RA=[0,.33,-.55],FA=[0,.33,.55];
@@ -1953,7 +1953,101 @@ function makeBike(color){const g=new THREE.Group();const fm=new THREE.MeshStanda
  const wheels=[];const TY=new THREE.TorusGeometry(.33,.028,6,24),RM=new THREE.TorusGeometry(.3,.012,4,24),SP=new THREE.BoxGeometry(.006,.6,.006);
  for(const z of[.55,-.55]){const w=new THREE.Group();const t=new THREE.Mesh(TY,dk);t.rotation.y=Math.PI/2;w.add(t);const r=new THREE.Mesh(RM,cr);r.rotation.y=Math.PI/2;w.add(r);for(let k=0;k<8;k++){const sp=new THREE.Mesh(SP,cr);sp.rotation.x=k*Math.PI/8;w.add(sp);}
   const hub=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,.08,8),cr);hub.rotation.z=Math.PI/2;w.add(hub);w.position.set(0,.33,z);g.add(w);wheels.push(w);}
- return {g,wheels,type:'bike',hl:.85,hw:.3,max:5.5,wr:.33,seat:[0,.62,-.3],lf:.6,lh:.9};}
+ return {g,wheels,type:'bike',hl:.85,hw:.3,max:5.5,wr:.33,seat:[0,.62,-.3],lf:.6,lh:.9,_v52Fallback:[...g.children],_v52Variant:Math.random()<.5?0:1};}
+
+/* V52: CC0 GLB vehicle visuals; native Three.js r128 GLTFLoader (no extra decoder).
+ * Real motor scooter https://cdn.3dassets.dev/assets/15431/v1/model.glb
+ * Japanese-city commuter bicycles 30073 + 30074, CC0 1.0.
+ * Vehicle physics, RIG, carRigUpdate and E-key logic remain unchanged.
+ * If asset CDN is unavailable, preserve original hand-built vehicle meshes.
+ */
+const V52_ASSET_SOURCES={
+ scooter:'https://cdn.3dassets.dev/assets/15431/v1/model.glb',
+ bicycleGreen:'https://cdn.3dassets.dev/assets/30073/v1/model.glb',
+ bicycleRed:'https://cdn.3dassets.dev/assets/30074/v1/model.glb'
+};
+const V52_ASSETS={scooter:null,bicycleGreen:null,bicycleRed:null,ready:0,failed:0};
+function v52TemplateFor(v){
+ if(v.type==='scooter')return V52_ASSETS.scooter;
+ if(v.type==='bike')return (v._v52Variant?V52_ASSETS.bicycleRed:V52_ASSETS.bicycleGreen)||
+   (v._v52Variant?V52_ASSETS.bicycleGreen:V52_ASSETS.bicycleRed);
+ return null;
+}
+function v52SetupVehicle(v){
+ if(!v||v._v52Installed||!(v.type==='bike'||v.type==='scooter'))return;
+ const prototype=v52TemplateFor(v);if(!prototype)return;
+ const body=prototype.clone(true);
+ // GLBs use metres +Y; some bicycles are authored lengthwise on X.
+ body.updateMatrixWorld(true);
+ let bb=new THREE.Box3().setFromObject(body),sz=bb.getSize(new THREE.Vector3());
+ if(sz.x>sz.z*1.3){body.rotation.y=Math.PI/2;body.updateMatrixWorld(true);}
+ bb.setFromObject(body);sz=bb.getSize(new THREE.Vector3());
+ if(!(sz.z>0.2)||!Number.isFinite(sz.z))return;
+ const nominal=v.type==='scooter'?1.82:1.72;
+ const k=nominal/sz.z;
+ body.scale.setScalar(k);body.updateMatrixWorld(true);
+ bb.setFromObject(body);
+ const cen=bb.getCenter(new THREE.Vector3());
+ body.position.set(-cen.x,-bb.min.y,-cen.z);
+ body.updateMatrixWorld(true);
+ body.traverse(o=>{
+  if(o.isMesh){o.castShadow=true;o.receiveShadow=false;}
+ });
+ // Save pivots on this particular clone; all mesh geometry is shared.
+ const wheelNodes=[];
+ for(const name of['wheel_F','wheel_R','wheel_front','wheel_rear','front_wheel','rear_wheel']){
+  const node=body.getObjectByName(name);
+  if(node&&!wheelNodes.includes(node))wheelNodes.push(node);
+ }
+ // Bikes may label their wheel pivots differently.
+ if(wheelNodes.length<2){
+  body.traverse(o=>{if(o.type==='Group'&&/^wheel/i.test(o.name)&&!wheelNodes.includes(o))wheelNodes.push(o);});
+ }
+ const wheelParts=wheelNodes.slice(0,2).map(o=>({node:o,rest:o.quaternion.clone()}));
+ body.name='V52_'+v.type+'_CC0';
+ v.g.add(body);
+ (v._v52Fallback||[]).forEach(o=>o.visible=false);
+ v._v52Installed=true;v._v52Visual=body;v._v52WheelParts=wheelParts;v._v52WheelAngle=0;
+ if(v.type==='scooter'){v.seat=[0,.82,-.22];v.wr=.255;}
+ else{v.seat=[0,.68,-.22];v.wr=.33;}
+ // AI rider has already been attached; update seat position after loading.
+ if(v.rider&&v.rider.g.parent===v.g){
+  v.rider.g.position.set(v.seat[0],v.seat[1]-.12,v.seat[2]);
+ }
+ // The playable rider may already be seated during async download.
+ if(PL.veh===v&&player.g.parent===v.g){
+  player.g.position.set(v.seat[0],v.seat[1]-.12,v.seat[2]);
+ }
+}
+function v52LoadBikeModels(){
+ if(typeof THREE.GLTFLoader!=='function')return;
+ const loader=new THREE.GLTFLoader();
+ for(const [kind,url] of Object.entries(V52_ASSET_SOURCES)){
+  loader.load(url,gltf=>{
+   V52_ASSETS[kind]=gltf.scene;V52_ASSETS.ready++;
+   for(const v of vehicles)v52SetupVehicle(v);
+   console.info('[三重漫遊 V52] CC0 GLB loaded:',kind);
+  },undefined,err=>{
+   V52_ASSETS.failed++;
+   console.warn('[三重漫遊 V52] Model unavailable; original visual retained:',kind,err);
+  });
+ }
+}
+function v52WheelTick(dt){
+ if(!dt)return;
+ const far=PL.veh?PL.veh.pos:PL.pos;
+ for(const v of vehicles){
+  if(!v._v52Installed||!v.g.visible||v.ai&&!v.active)continue;
+  if(Math.abs(v.pos.x-far.x)>110||Math.abs(v.pos.z-far.z)>110)continue;
+  if(Math.abs(v.speed)<.01)continue;
+  v._v52WheelAngle+=v.speed*dt/(v.wr||.3);
+  for(const w of v._v52WheelParts){
+   const spin=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),v._v52WheelAngle);
+   w.node.quaternion.copy(w.rest).multiply(spin);
+  }
+ }
+}
+
 const vehicles=[];
 function addVehicle(v,x,z,h,ai){v.pos=new THREE.Vector3(x,0,z);v.h=h;v.speed=0;v.ai=ai;v.g.position.copy(v.pos);v.g.rotation.y=h;scene.add(v.g);vehicles.push(v);return v;}
 
@@ -2016,6 +2110,13 @@ for(const[a,b]of MAIN_L){for(let z=a+6;z<b-6;z+=R(14,26)){if(MOUTHS.some(m=>Math
 // V50: eight easy-to-find sedans on the east curb of Renyi St, away from intersections.
 for(const z of[-163,-143,-103,-75,-27,35,77,108]){if([FR_Z,BI_Z,TH_Z].some(i=>Math.abs(z-i)<8))continue;parked(makeCar(pick(CAR_COLS)),4.35,z,Math.PI);}
 for(const[a,b]of MAIN_L){for(let z=a+2;z<b-2;z+=R(3,10)){if(MOUTHS.some(m=>Math.abs(m-z)<4))continue;if(rnd()<0.45)parked(makeScooter(pick(SC_COLS)),-8.1,z,Math.PI/2+R(-.15,.15));}}
+// V52: street bicycles available for E-key riding, including a bike close to spawn.
+for(const z of[-153,-118,-72,28,102,159]){
+ if(MOUTHS.some(m=>Math.abs(m-z)<5))continue;
+ parked(makeBike(pick(['#2a9d8f','#bb4430'])),-7.6,z,Math.PI/2);
+}
+parked(makeBike('#2a9d8f'),8.0,120.3,0);
+parked(makeScooter('#597a92'),7.3,116.8,0);
 for(const[a,b]of MAIN_R.slice(1)){for(let z=a+4;z<b-4;z+=8.5){if(rnd()<0.4)parked(makeScooter(pick(SC_COLS)),8.8,z+R(-1,1),-Math.PI/2+R(-.2,.2));}}
 for(let i=0;i<5;i++)parked(makeBike('#f2b705'),57.2,-171+i*1.9,-Math.PI/2);
 
@@ -3303,7 +3404,7 @@ let last=performance.now(),frame=0,time=0,started=false,perfT=0,perfN=0,perfDone
 function loop(now){requestAnimationFrame(loop);const dt=Math.min(0.05,(now-last)/1000);last=now;time+=dt;frame++;liftRestore();
  if(started){updatePlayer(dt);updateBattle(dt);}if(typeof rigTick==='function')rigTick(dt);if(!started&&typeof titleCam==='function')titleCam(dt);
  const camP=camera.position;
- updateAI(dt,camP);updatePeds(dt,camP,frame);if(started)v50PhysicsTick(dt);updateSchool(dt,camP,time);updateXinbei(dt,time,camP);updateInteract(dt);for(let i=0;i<(window.__LIFE_X||1);i++)updateSchoolLife(dt,time);updateCamera(dt);updateLightFX(camP,frame);
+ updateAI(dt,camP);v52WheelTick(dt);updatePeds(dt,camP,frame);if(started)v50PhysicsTick(dt);updateSchool(dt,camP,time);updateXinbei(dt,time,camP);updateInteract(dt);for(let i=0;i<(window.__LIFE_X||1);i++)updateSchoolLife(dt,time);updateCamera(dt);updateLightFX(camP,frame);
  rainMat.uniforms.uT.value=time;if(finalPass)finalPass.uniforms.uTime.value=time;
  for(const c of idlers)c.head.rotation.y=Math.sin(time*0.5+c.phase)*0.4;
  if(frame%3===0){drawMap();const[a,b]=locationName(PL.pos.x,PL.pos.z);if(locEl.dataset.k!==a+b){locEl.dataset.k=a+b;locEl.innerHTML=`<b>${a}</b><span>${b}</span>`;}
@@ -4612,6 +4713,7 @@ function openBag(){const ks=Object.keys(INV);SHOP={th:{c1:'#f5c451'},title:'背�
 function closeShop(){SHOP=null;const el=document.getElementById('shop');if(el)el.style.display='none';}
 
 (window.__LATE||[]).forEach(f=>f());liftSchool();mergeStatic(S);buildLightFX();setupComposer();applyPreset();drawMapBg();
+v52LoadBikeModels();
 PL.pos.y=groundY(PL.pos.x,PL.pos.z);camYaw=PL.rot+Math.PI;camPos.set(PL.pos.x,PL.pos.y+4,PL.pos.z+7);
 requestAnimationFrame(loop);
 for(const id of['ttStart','ttDesign','ttDay'])document.getElementById(id).disabled=false;document.getElementById('loading').textContent='準備好了';
@@ -4620,7 +4722,7 @@ for(const id of['ttStart','ttDesign','ttDay'])document.getElementById(id).disabl
  * Audio starts ONLY after a user click (browser autoplay policy).
  * No licensed tracks or external media files.
  */
-const GAME_META={version:'V51',updated:'2026/11/23',feature:'原創電影片頭／配樂／版本資訊'};
+const GAME_META={version:'V52',updated:'2026/11/23',feature:'免費 CC0 3D 機車與腳踏車／E 鍵上下車'};
 window.GAME_META=GAME_META;
 document.getElementById('ttBuildVersion').textContent=GAME_META.version;
 document.getElementById('ttBuildDate').textContent='更新日期｜'+GAME_META.updated;
@@ -4706,7 +4808,7 @@ function v51PlayFilm(){
   [450,'這裡，是我們的城市'],
   [3200,'仁義街・每個街角都有故事'],
   [6050,'五華國小・每天都有新冒險'],
-  [8750,'三重漫遊  V51']];
+  [8750,'三重漫遊  V52']];
  for(const [delay,title] of captions){
   V51_FILM.handles.push(setTimeout(()=>{
    if(!V51_FILM.active)return;
@@ -4760,6 +4862,7 @@ function titleCam(dt){
 }
 
 window.__v50={physics:V50_PHYS,weather:V50_REAL,refreshWeather:v50WeatherFetch};
+window.__v52={assets:V52_ASSETS,sources:V52_ASSET_SOURCES,setup:v52SetupVehicle};
 window.__dbg={aim:()=>({startAim,aimStop,get AIM(){return AIM;},DIR,WALLET,SCHED}),battle:()=>({startBattle,get B(){return BATTLE;},PROF,leaveBattle,openSkills}),v6:()=>({HOOPS,BIRDS,BB,peKids,DOGS,IDLE_DOGS,setCarry,get CARRY(){return CARRY;}}),design:()=>({openDesigner,closeDesigner,AV,DOGS,IDLE_DOGS,OSTAFF,SWINGS,zoomBy,get player(){return player;}}),life:()=>({SCHED,WALLET,INTERACT,allKids,classrooms,toggleVehicle,nearestInteract}),top:(x0,z0,x1,z1,W,H)=>{const oc=new THREE.OrthographicCamera(x0,x1,-z0,-z1,1,900);oc.position.set(0,600,0);oc.up.set(0,0,-1);oc.lookAt(0,0,0);oc.position.set(0,600,0);const f=scene.fog;scene.fog=null;sky.visible=false;rain.visible=false;const sc=sun.shadow.camera;const old=[sc.left,sc.right,sc.top,sc.bottom];sc.left=-260;sc.right=260;sc.top=320;sc.bottom=-320;sc.updateProjectionMatrix();sun.position.set(-70+(x0+x1)/2,300,60+(z0+z1)/2);sun.target.position.set((x0+x1)/2,0,(z0+z1)/2);for(const p of peds)p.c.g.visible=true;renderer.setPixelRatio(1);renderer.setSize(W,H);renderer.render(scene,oc);const url=renderer.domElement.toDataURL('image/png');scene.fog=f;sky.visible=true;return url;},free:(a,b)=>{FREECAM=a?[a,b]:null;},teleport,PL,ST,applyPreset,info:()=>renderer.info.render,setCam:(y,p,d)=>{camYaw=y;camPitch=p;camDist=d;},start:()=>{document.getElementById('intro').style.display='none';started=true;if(window.TTL)TTL.on=false;},vehicles,ALLEYS,composer:()=>!!composer,counts:()=>({colliders:colliders.length,lights:LIGHTS.length,blockers:blockers.length,meshes:S.children.length})};
 </script>
 
