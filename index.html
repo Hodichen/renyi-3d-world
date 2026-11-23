@@ -1969,8 +1969,7 @@ const V52_ASSET_SOURCES={
 const V52_ASSETS={scooter:null,bicycleGreen:null,bicycleRed:null,ready:0,failed:0};
 function v52TemplateFor(v){
  if(v.type==='scooter')return V52_ASSETS.scooter;
- if(v.type==='bike')return (v._v52Variant?V52_ASSETS.bicycleRed:V52_ASSETS.bicycleGreen)||
-   (v._v52Variant?V52_ASSETS.bicycleGreen:V52_ASSETS.bicycleRed);
+ if(v.type==='bike')return v._v52Variant?V52_ASSETS.bicycleRed:V52_ASSETS.bicycleGreen;
  return null;
 }
 function v52SetupVehicle(v){
