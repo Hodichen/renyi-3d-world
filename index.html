@@ -263,7 +263,7 @@ border:1px solid #ffb8d9;color:#fff;background:#1b132eaa;padding:11px 16px;borde
  <div id="ttFilmCaption" aria-live="polite"></div>
  <button id="ttSkip" type="button">略過片頭 ›</button>
  <div class="tt">
-  <div id="ttBuild"><span class="mini">CURRENT BUILD ・ 三重漫遊</span><strong id="ttBuildVersion">V54</strong><span class="date" id="ttBuildDate">更新日期｜2026/11/23</span></div>
+  <div id="ttBuild"><span class="mini">CURRENT BUILD ・ 三重漫遊</span><strong id="ttBuildVersion">V55</strong><span class="date" id="ttBuildDate">更新日期｜2026/11/23</span></div>
   <div class="ttLogo"><div class="ttSeal">三<br>重</div><div><div class="ttName">漫遊</div><div class="ttSub">SANCHONG AFTERGLOW ・ 仁義街 × 五華國小</div></div></div>
   <div class="ttMenu">
    <button id="ttStart" disabled><b>開始漫遊</b><i>START</i><em id="loading">建造街道中…</em></button>
@@ -2091,8 +2091,10 @@ function v52SetupVehicle(v){
  // Original bicycles are authored lengthwise on X, so wheel axle is local Z.
  v._v52WheelAxis=new THREE.Vector3(0,0,v53LengthOnX?1:0);
  if(!v53LengthOnX)v._v52WheelAxis.set(1,0,0);
- if(v.type==='scooter'){v.seat=[0,.82,-.22];v.wr=.255;}
- else{v.seat=[0,.68,-.22];v.wr=.33;}
+ // V55: poseSit shifts hips by 0.43 m. Seat is the character root
+ // plus 0.12 m; this puts the pelvis on the actual saddle, not above it.
+ if(v.type==='scooter'){v.seat=[0,.50,-.28];v.wr=.255;}
+ else{v.seat=[0,.59,-.20];v.wr=.33;}
  // AI rider has already been attached; update seat position after loading.
  if(v.rider&&v.rider.g.parent===v.g){
   v.rider.g.position.set(v.seat[0],v.seat[1]-.12,v.seat[2]);
@@ -3460,7 +3462,7 @@ function updateAI(dt,camP){const plv=PL.veh;
    if(Math.hypot(tmpS.x-camP.x,tmpS.z-camP.z)<95){v.respawn=0.5;continue;}if(vehicles.some(o=>o!==v&&(o.active||!o.ai)&&Math.hypot(o.pos.x-tmpS.x,o.pos.z-tmpS.z)<12)){v.respawn=0.7;continue;}placeOnPath(v,pi,0);continue;}
   const fx=Math.sin(v.h),fz=Math.cos(v.h);let target=v.max*(ST.rain?0.85:1);const look=8+v.speed*1.6;
   if(v.ghost<=0){const check=(ox,oz,ohl,ohw)=>{const dx=ox-v.pos.x,dz=oz-v.pos.z;const a=dx*fx+dz*fz;if(a<=0||a>look+ohl)return;const b=Math.abs(-dx*fz+dz*fx);if(b>v.hw+ohw+0.15)return;const gap=a-v.hl-ohl;target=Math.min(target,Math.max(0,(gap-1.5)*1.1));};
-   for(const o of vehicles){if(o===v)continue;if(o.ai&&!o.active)continue;if(!o.ai&&!o.moved)continue;check(o.pos.x,o.pos.z,o.hl,o.hw);}
+   for(const o of vehicles){if(o===v)continue;if(o.ai&&!o.active)continue;check(o.pos.x,o.pos.z,o.hl,o.hw);}
    if(!plv)check(PL.pos.x,PL.pos.z,0.4,0.4);}else v.ghost-=dt;
   for(const e of v.path.entries){if(v.s>e.sOut){e.I.users.delete(v);continue;}if(v.s<e.sIn){const dist=e.sIn-v.s;if(dist<2+v.speed*0.9&&!e.I.users.has(v)){let ok=true;for(const[o,oe]of e.I.users){if(o.active&&!compat(e,oe)){ok=false;break;}}if(ok)e.I.users.set(v,e);else target=Math.min(target,Math.max(0,(dist-1)*1.2));}}break;}
   if(target<0.3){v.wait+=dt;if(v.wait>7){v.ghost=2.5;v.wait=0;}}else v.wait=0;
@@ -4430,7 +4432,9 @@ function WS(cf){const{x1,x2,z1,z2,th}=cf,H=3.4,X=a=>x2-a,Z=b=>z1+b,W=z2-z1;INDOO
 
 // ===== 真實車款（沿用元鈦科技樹林廠 cars/real/*.b64.txt）：鏡頭 48m 內最近 14 台換成真車模型，其餘保留方塊車 =====
 const REAL_CARS={altis:{L:4.63,paint:/^body$/i},cross:{L:4.46,paint:/CarPai/i},rav4:{L:4.6,paint:null},modely:{L:4.75,paint:/carpaint/i},bmw330:{L:4.71,paint:/3erg20_paint/i,flip:1},x5:{L:4.92,paint:/carpaint/i}};
-const CARRIG={t:0,max:14,range:48,pool:['altis','cross','rav4','modely','bmw330','x5','altis','cross','rav4'],scn:{},load:{},paint:{},flip:0};
+// V55: BMW 330 GLB shows damaged-looking faces on iPad; keep source
+// for future repairs, but exclude it from randomized traffic for now.
+const CARRIG={t:0,max:14,range:48,pool:['altis','cross','rav4','modely','x5','altis','cross','rav4'],scn:{},load:{},paint:{},flip:0};
 function carGet(n){if(CARRIG.scn[n])return CARRIG.scn[n];if(CARRIG.load[n])return null;
  if(!THREE.GLTFLoader||!window.MeshoptDecoder){CARRIG.load[n]='fail';return null;}
  CARRIG.load[n]=fetch('cars/real/'+n+'.b64.txt').then(r=>{if(!r.ok)throw r.status;return r.text();}).then(t=>new Promise((res,rej)=>{const b=atob(t.trim()),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);const L=new THREE.GLTFLoader();L.setMeshoptDecoder(MeshoptDecoder);L.parse(u.buffer,'',g=>res(g.scene),rej);}))
@@ -4851,7 +4855,7 @@ for(const id of['ttStart','ttDesign','ttDay'])document.getElementById(id).disabl
  * Audio starts ONLY after a user click (browser autoplay policy).
  * No licensed tracks or external media files.
  */
-const GAME_META={version:'V54',updated:'2026/11/23',feature:'修正輪胎方向與輪胎穿地／保留可騎乘車輛'};
+const GAME_META={version:'V55',updated:'2026/11/23',feature:'騎士坐姿校正／停車避障／破面真車暫停顯示'};
 window.GAME_META=GAME_META;
 document.getElementById('ttBuildVersion').textContent=GAME_META.version;
 document.getElementById('ttBuildDate').textContent='更新日期｜'+GAME_META.updated;
@@ -4937,7 +4941,7 @@ function v51PlayFilm(){
   [450,'這裡，是我們的城市'],
   [3200,'仁義街・每個街角都有故事'],
   [6050,'五華國小・每天都有新冒險'],
-  [8750,'三重漫遊  V54']];
+  [8750,'三重漫遊  V55']];
  for(const [delay,title] of captions){
   V51_FILM.handles.push(setTimeout(()=>{
    if(!V51_FILM.active)return;
