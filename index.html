@@ -135,6 +135,63 @@ button:focus-visible{outline:2px solid var(--on);outline-offset:2px}
 .ttMenu button:hover,.ttMenu button:focus{border-left-color:#fa7bad!important;background:rgba(255,108,174,.14)!important}
 body.titleOn #v50WeatherHUD{display:none}
 @media(max-width:760px){#v50WeatherHUD{top:auto!important;bottom:calc(183px + env(safe-area-inset-bottom,0px))!important;max-width:50vw!important;font-size:10px!important}}
+
+/* V51 — original cinematic title sequence and live build stamp */
+#intro{overflow:hidden}
+#intro::before{content:'';position:absolute;inset:-25%;z-index:0;pointer-events:none;opacity:.52;
+background:radial-gradient(ellipse 45% 24% at 74% 33%,rgba(255,147,124,.34),transparent 75%),linear-gradient(116deg,transparent 42%,rgba(225,94,173,.1) 50%,transparent 60%);
+animation:v51SkyDrift 19s ease-in-out infinite alternate}
+#intro::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:2;opacity:.24;
+background:repeating-linear-gradient(0deg,transparent 0px,transparent 4px,rgba(255,255,255,.045) 5px,transparent 6px);
+animation:v51Scan 8s linear infinite}
+#intro .tt{z-index:3}
+.ttLogo{animation:v51Rise 1.4s cubic-bezier(.2,.7,.15,1) both}
+.ttName{animation:v51Neon 5.4s ease-in-out infinite alternate}
+.ttMenu{animation:v51Rise 1.1s .65s ease-out both}
+.ttMenu button{transition:transform .2s,background .2s}
+.ttMenu button:hover{transform:translateX(7px)}
+#ttBuild{position:absolute;right:calc(30px + env(safe-area-inset-right,0px));top:calc(26px + env(safe-area-inset-top,0px));
+z-index:6;min-width:166px;display:flex;flex-direction:column;gap:4px;align-items:flex-end;color:#ffedf4;
+font-family:inherit;text-shadow:0 2px 12px #0009;text-align:right;letter-spacing:.08em;animation:v51Rise .8s .4s both}
+#ttBuild .mini{font-size:9px;font-weight:800;color:#ffd2e4;letter-spacing:.18em}
+#ttBuild strong{font-size:clamp(25px,3vw,39px);font-weight:950;line-height:1;color:#fff1d7;text-shadow:2px 2px #b84981,0 0 20px #d95ca955}
+#ttBuild .date{font-size:11px;letter-spacing:.04em}
+#ttTitleActions{position:absolute;left:calc(32px + env(safe-area-inset-left,0px));bottom:calc(72px + env(safe-area-inset-bottom,0px));z-index:8;
+display:flex;gap:9px;align-items:center;flex-wrap:wrap;max-width:calc(100vw - 60px);animation:v51Rise 1s 1s both}
+#ttTitleActions button{appearance:none;border-radius:9px;padding:9px 14px;cursor:pointer;font:800 12px inherit;letter-spacing:.07em;
+color:#fff;background:rgba(43,28,62,.74);border:1px solid rgba(255,180,219,.5);box-shadow:0 3px 22px #0c051e33;
+backdrop-filter:blur(9px)}
+#ttTitleActions #ttFilmPlay{background:linear-gradient(105deg,#da5e8f,#6d4fa6);border-color:#ffb7d7}
+#ttTitleActions button:hover{filter:brightness(1.15)}
+#ttTitleActions .audioHint{color:#f7ddeb;font:500 10px system-ui;opacity:.8}
+#ttFilmCaption{position:absolute;z-index:6;left:50%;bottom:22%;width:min(80%,780px);transform:translate(-50%,20px);
+text-align:center;font-family:inherit;color:#fff6ed;letter-spacing:.24em;font-size:clamp(18px,4.6vw,54px);
+font-weight:950;text-shadow:0 4px 0 #b44382,0 14px 28px #000;opacity:0;pointer-events:none;
+transition:opacity .5s ease,transform .7s ease}
+#ttFilmCaption.on{opacity:1;transform:translate(-50%,0)}
+#ttFilmBars{position:absolute;inset:0;pointer-events:none;z-index:5;opacity:0;transition:opacity .6s}
+#ttFilmBars::before,#ttFilmBars::after{content:'';position:absolute;left:0;right:0;height:clamp(28px,8vh,84px);background:#0a0813}
+#ttFilmBars::before{top:0}#ttFilmBars::after{bottom:0}
+#ttSkip{display:none;position:absolute;right:28px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:9;
+border:1px solid #ffb8d9;color:#fff;background:#1b132eaa;padding:11px 16px;border-radius:8px;font:700 13px system-ui;cursor:pointer}
+#intro.filmPlaying #ttFilmBars{opacity:1}
+#intro.filmPlaying #ttFilmCaption{display:block}
+#intro.filmPlaying .ttLogo,#intro.filmPlaying .ttMenu,#intro.filmPlaying #ttTitleActions,#intro.filmPlaying .ttTipBar{opacity:0;pointer-events:none}
+#intro.filmPlaying #ttSkip{display:block}
+#intro.filmPlaying .ttLogo{animation:none}
+#intro.filmPlaying #ttBuild{opacity:.55}
+#intro.filmPlaying #ttBuild strong{font-size:26px}
+@keyframes v51Rise{from{opacity:0;transform:translateY(28px);filter:blur(6px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
+@keyframes v51Neon{0%,100%{filter:brightness(1)}54%{filter:brightness(1.08)}56%{filter:brightness(.92)}59%{filter:brightness(1.15)}}
+@keyframes v51SkyDrift{from{transform:translateX(-2%) rotate(-1deg)}to{transform:translateX(3%) rotate(2deg)}}
+@keyframes v51Scan{from{background-position:0 0}to{background-position:0 250px}}
+@media(max-width:760px){#ttBuild{right:14px;top:16px;min-width:100px}#ttBuild .mini{font-size:8px}#ttBuild .date{font-size:10px}
+ #ttTitleActions{left:18px;bottom:calc(65px + env(safe-area-inset-bottom,0px));gap:6px}
+ #ttTitleActions button{padding:8px 11px;font-size:11px}#ttTitleActions .audioHint{display:none}
+ #ttFilmCaption{bottom:29%;width:90%;font-size:clamp(17px,5vw,32px)}}
+@media(prefers-reduced-motion:reduce){#intro::before,#intro::after,.ttLogo,.ttName,.ttMenu,#ttBuild,#ttTitleActions{animation:none!important}
+#ttFilmCaption{transition:none}}
+
 </style>
 <div id="loc" class="chip"><b>仁義街</b><span>新北市三重區</span></div>
 <div id="fx">
@@ -201,7 +258,12 @@ body.titleOn #v50WeatherHUD{display:none}
   </div>
   <button class="btn" id="helpClose">繼續逛</button>
 </div></div>
-<div id="intro"><div class="tt">
+<div id="intro">
+ <div id="ttFilmBars" aria-hidden="true"></div>
+ <div id="ttFilmCaption" aria-live="polite"></div>
+ <button id="ttSkip" type="button">略過片頭 ›</button>
+ <div class="tt">
+  <div id="ttBuild"><span class="mini">CURRENT BUILD ・ 三重漫遊</span><strong id="ttBuildVersion">V51</strong><span class="date" id="ttBuildDate">更新日期｜2026/11/23</span></div>
   <div class="ttLogo"><div class="ttSeal">三<br>重</div><div><div class="ttName">漫遊</div><div class="ttSub">SANCHONG AFTERGLOW ・ 仁義街 × 五華國小</div></div></div>
   <div class="ttMenu">
    <button id="ttStart" disabled><b>開始漫遊</b><i>START</i><em id="loading">建造街道中…</em></button>
@@ -209,6 +271,11 @@ body.titleOn #v50WeatherHUD{display:none}
    <button id="ttDay" disabled><b>白天出發</b><i>DAYTIME</i></button>
    <button id="ttHelp"><b>操作說明</b><i>CONTROLS</i></button>
    <div id="ttHelpBox">左下搖桿移動，拖曳畫面轉視角，「跑」加速、「跳」跳躍。<br>鍵盤：WASD 移動、Shift 跑、空白鍵跳、E 互動 / 上下車、C 設計角色、K 等級技能。<br>走路時鏡頭會慢慢轉到角色背後。</div>
+  </div>
+  <div id="ttTitleActions">
+   <button type="button" id="ttFilmPlay">▶ 播放電影片頭</button>
+   <button type="button" id="ttMusicToggle">♫ 音樂：關</button>
+   <span class="audioHint">原創配樂 · 點擊播放以啟用聲音</span>
   </div>
   <div class="ttTipBar"><span>小提示</span><em id="ttTip"></em></div>
  </div></div>
@@ -4548,16 +4615,149 @@ function closeShop(){SHOP=null;const el=document.getElementById('shop');if(el)el
 PL.pos.y=groundY(PL.pos.x,PL.pos.z);camYaw=PL.rot+Math.PI;camPos.set(PL.pos.x,PL.pos.y+4,PL.pos.z+7);
 requestAnimationFrame(loop);
 for(const id of['ttStart','ttDesign','ttDay'])document.getElementById(id).disabled=false;document.getElementById('loading').textContent='準備好了';
-// ===== 主畫面：三重漫遊（夜景、慢慢繞著仁義街與五華國小飛） =====
+
+/* V51: 3D in-engine cinematic opening + original Web Audio score.
+ * Audio starts ONLY after a user click (browser autoplay policy).
+ * No licensed tracks or external media files.
+ */
+const GAME_META={version:'V51',updated:'2026/11/23',feature:'原創電影片頭／配樂／版本資訊'};
+window.GAME_META=GAME_META;
+document.getElementById('ttBuildVersion').textContent=GAME_META.version;
+document.getElementById('ttBuildDate').textContent='更新日期｜'+GAME_META.updated;
+const INTRO_SCORE={ctx:null,master:null,timer:null,step:0,nextTime:0,enabled:false};
+function v51Pitch(midi){return 440*Math.pow(2,(midi-69)/12);}
+function v51Tone(freq,start,duration,level,shape='triangle'){
+ const ctx=INTRO_SCORE.ctx;
+ if(!ctx||ctx.state==='closed')return;
+ const osc=ctx.createOscillator(),env=ctx.createGain();
+ osc.type=shape;osc.frequency.setValueAtTime(freq,start);
+ env.gain.setValueAtTime(.0001,start);
+ env.gain.exponentialRampToValueAtTime(Math.max(.0002,level),start+Math.min(.06,duration*.18));
+ env.gain.exponentialRampToValueAtTime(.0001,start+duration);
+ osc.connect(env);env.connect(INTRO_SCORE.master);
+ osc.start(start);osc.stop(start+duration+.015);
+ osc.onended=()=>{osc.disconnect();env.disconnect();};
+}
+function v51ScoreStep(step,when){
+ const beat=60/93,unit=beat/2,bar=Math.floor(step/16)%4,i=step%16;
+ const chords=[[53,56,60],[49,53,56],[56,60,63],[51,55,58]];
+ const bass=[41,37,44,39],lead=[
+  65,0,68,0,72,0,68,65,0,63,0,60,63,0,65,0,
+  65,0,68,0,73,0,72,68,0,65,0,61,63,0,65,0,
+  68,0,72,0,75,0,72,68,0,65,0,63,65,0,68,0,
+  67,0,70,0,75,0,70,67,0,63,0,58,63,0,67,0];
+ if(i===0){
+  for(const m of chords[bar])v51Tone(v51Pitch(m),when,beat*7.1,.034,'sine');
+  v51Tone(v51Pitch(bass[bar]),when,beat*1.45,.11,'sawtooth');
+ }
+ if(i===8)v51Tone(v51Pitch(bass[bar]),when,beat*1.3,.073,'triangle');
+ if(i%2===0){const arp=chords[bar][(i/2)%3]+12;v51Tone(v51Pitch(arp),when,unit*.65,.028,'sine');}
+ const m=lead[step%64];if(m)v51Tone(v51Pitch(m),when,unit*.92,.042,'triangle');
+ if(i===4||i===12)v51Tone(110,when,.11,.027,'sine');
+}
+function v51ScheduleMusic(){
+ const q=INTRO_SCORE,ctx=q.ctx;if(!q.enabled||!ctx||ctx.state==='closed')return;
+ const unit=60/93/2;
+ while(q.nextTime<ctx.currentTime+.19){
+  v51ScoreStep(q.step++,q.nextTime);q.nextTime+=unit;
+ }
+}
+function v51MusicStart(){
+ if(INTRO_SCORE.enabled)return;
+ const Ctx=window.AudioContext||window.webkitAudioContext;
+ if(!Ctx){document.getElementById('ttMusicToggle').textContent='♫ 裝置不支援音效';return;}
+ try{
+  const ctx=new Ctx(),master=ctx.createGain();
+  master.gain.value=.0001;master.connect(ctx.destination);
+  INTRO_SCORE.ctx=ctx;INTRO_SCORE.master=master;INTRO_SCORE.step=0;INTRO_SCORE.nextTime=ctx.currentTime+.055;INTRO_SCORE.enabled=true;
+  master.gain.setTargetAtTime(.52,ctx.currentTime,.23);
+  ctx.resume().catch(()=>{});
+  INTRO_SCORE.timer=setInterval(v51ScheduleMusic,80);
+  v51ScheduleMusic();
+  document.getElementById('ttMusicToggle').textContent='♫ 音樂：開';
+ }catch(err){INTRO_SCORE.enabled=false;document.getElementById('ttMusicToggle').textContent='♫ 音樂無法啟用';}
+}
+function v51MusicStop(){
+ const q=INTRO_SCORE;if(!q.enabled)return;
+ q.enabled=false;clearInterval(q.timer);q.timer=null;
+ if(q.ctx){
+  const closing=q.ctx;
+  try{q.master.gain.setTargetAtTime(.0001,closing.currentTime,.12);}catch(_){}
+  setTimeout(()=>{closing.close().catch(()=>{});},450);
+ }
+ q.ctx=null;q.master=null;
+ document.getElementById('ttMusicToggle').textContent='♫ 音樂：關';
+}
+const V51_FILM={active:false,handles:[]};
+function v51EndFilm(){
+ if(!V51_FILM.active)return;
+ V51_FILM.active=false;V51_FILM.handles.forEach(clearTimeout);V51_FILM.handles.length=0;
+ const intro=document.getElementById('intro'),cap=document.getElementById('ttFilmCaption');
+ intro.classList.remove('filmPlaying');cap.classList.remove('on');cap.textContent='';
+ if(window.TTL){TTL.film=false;TTL.t=0;}
+}
+function v51PlayFilm(){
+ if(!window.TTL||!TTL.on)return;
+ v51EndFilm();v51MusicStart();
+ V51_FILM.active=true;TTL.film=true;TTL.t=0;
+ const intro=document.getElementById('intro'),cap=document.getElementById('ttFilmCaption');
+ intro.classList.add('filmPlaying');
+ const captions=[
+  [450,'這裡，是我們的城市'],
+  [3200,'仁義街・每個街角都有故事'],
+  [6050,'五華國小・每天都有新冒險'],
+  [8750,'三重漫遊  V51']];
+ for(const [delay,title] of captions){
+  V51_FILM.handles.push(setTimeout(()=>{
+   if(!V51_FILM.active)return;
+   cap.classList.remove('on');
+   V51_FILM.handles.push(setTimeout(()=>{if(V51_FILM.active){cap.textContent=title;cap.classList.add('on');}},220));
+  },delay));
+ }
+ V51_FILM.handles.push(setTimeout(v51EndFilm,11800));
+}
+document.getElementById('ttFilmPlay').addEventListener('click',v51PlayFilm);
+document.getElementById('ttSkip').addEventListener('click',v51EndFilm);
+document.getElementById('ttMusicToggle').addEventListener('click',()=>{
+ if(INTRO_SCORE.enabled)v51MusicStop();else v51MusicStart();
+});
+document.addEventListener('visibilitychange',()=>{
+ const ctx=INTRO_SCORE.ctx;if(!ctx)return;
+ if(document.hidden)ctx.suspend().catch(()=>{});
+ else if(INTRO_SCORE.enabled)ctx.resume().catch(()=>{});
+});
+
+// ===== 主畫面：三重漫遊（V51 開場電影空拍） =====
 {const TIPS=['仁義街走到底就是五華國小的仁義門','進安公園裡有七夕走鵲橋，可以去找找','騎機車記得戴安全帽，晚上路燈下比較安全','六藝樓圓形穿堂的樓梯可以走上二樓教室','上課時間在校園亂晃，小心被學務主任抓到','下雨天路面濕滑，騎車慢一點','圓形穿堂的白鹿壁畫是五華國小的招牌'];
  const tp=document.getElementById('ttTip');let ti=0;const nextTip=()=>{tp.textContent=TIPS[ti++%TIPS.length];};nextTip();setInterval(nextTip,5200);
  window.TTL={on:true,t:0};document.body.classList.add('titleOn');v50Clock();v50WeatherFetch();
- const close=(fn)=>{TTL.on=false;document.body.classList.remove('titleOn');FREECAM=null;document.getElementById('intro').classList.add('gone');setTimeout(()=>document.getElementById('intro').style.display='none',600);started=true;if(fn)fn();else cv.focus();};
+ const close=(fn)=>{v51EndFilm();v51MusicStop();TTL.on=false;document.body.classList.remove('titleOn');FREECAM=null;document.getElementById('intro').classList.add('gone');setTimeout(()=>document.getElementById('intro').style.display='none',600);started=true;if(fn)fn();else cv.focus();};
  document.getElementById('ttStart').onclick=()=>close();
  document.getElementById('ttDesign').onclick=()=>close(()=>openDesigner());
  document.getElementById('ttHelp').onclick=()=>{const h=document.getElementById('ttHelpBox');h.style.display=h.style.display==='block'?'none':'block';};
  document.getElementById('ttDay').onclick=()=>{V50_REAL.auto=false;ST.tod='day';ST.rain=false;applyPreset();document.querySelectorAll('[data-tod]').forEach(b=>b.classList.toggle('on',b.dataset.tod==='day'));close();};}
-function titleCam(dt){if(!window.TTL||!TTL.on)return;TTL.t+=dt;const a=TTL.t*0.045;const cx=0,cz=-230,r=150;FREECAM=[[cx+Math.cos(a)*r,62+Math.sin(TTL.t*0.1)*6,cz+Math.sin(a)*r],[cx,4,cz]];}
+function titleCam(dt){
+ if(!window.TTL||!TTL.on)return;
+ TTL.t+=dt;
+ if(TTL.film){
+  // Continuous 3D city-to-school tracking shots; no prerendered video.
+  const frames=[
+   {p:[16,12,171],l:[0,4,108]},
+   {p:[-28,18,66],l:[0,5,7]},
+   {p:[18,23,-100],l:[0,6,-177]},
+   {p:[74,41,-220],l:[3,8,-274]},
+   {p:[112,66,-265],l:[0,6,-254]}];
+  const total=11.8,segment=total/(frames.length-1),index=Math.min(frames.length-2,Math.floor(TTL.t/segment));
+  let f=Math.max(0,Math.min(1,(TTL.t-index*segment)/segment));f=f*f*(3-2*f);
+  const a=frames[index],b=frames[index+1];
+  const mix=(v,w)=>v+(w-v)*f;
+  FREECAM=[[mix(a.p[0],b.p[0]),mix(a.p[1],b.p[1]),mix(a.p[2],b.p[2])],
+           [mix(a.l[0],b.l[0]),mix(a.l[1],b.l[1]),mix(a.l[2],b.l[2])]];
+ }else{
+  const a=TTL.t*.045,cx=0,cz=-230,r=150;
+  FREECAM=[[cx+Math.cos(a)*r,62+Math.sin(TTL.t*.1)*6,cz+Math.sin(a)*r],[cx,4,cz]];
+ }
+}
 
 window.__v50={physics:V50_PHYS,weather:V50_REAL,refreshWeather:v50WeatherFetch};
 window.__dbg={aim:()=>({startAim,aimStop,get AIM(){return AIM;},DIR,WALLET,SCHED}),battle:()=>({startBattle,get B(){return BATTLE;},PROF,leaveBattle,openSkills}),v6:()=>({HOOPS,BIRDS,BB,peKids,DOGS,IDLE_DOGS,setCarry,get CARRY(){return CARRY;}}),design:()=>({openDesigner,closeDesigner,AV,DOGS,IDLE_DOGS,OSTAFF,SWINGS,zoomBy,get player(){return player;}}),life:()=>({SCHED,WALLET,INTERACT,allKids,classrooms,toggleVehicle,nearestInteract}),top:(x0,z0,x1,z1,W,H)=>{const oc=new THREE.OrthographicCamera(x0,x1,-z0,-z1,1,900);oc.position.set(0,600,0);oc.up.set(0,0,-1);oc.lookAt(0,0,0);oc.position.set(0,600,0);const f=scene.fog;scene.fog=null;sky.visible=false;rain.visible=false;const sc=sun.shadow.camera;const old=[sc.left,sc.right,sc.top,sc.bottom];sc.left=-260;sc.right=260;sc.top=320;sc.bottom=-320;sc.updateProjectionMatrix();sun.position.set(-70+(x0+x1)/2,300,60+(z0+z1)/2);sun.target.position.set((x0+x1)/2,0,(z0+z1)/2);for(const p of peds)p.c.g.visible=true;renderer.setPixelRatio(1);renderer.setSize(W,H);renderer.render(scene,oc);const url=renderer.domElement.toDataURL('image/png');scene.fog=f;sky.visible=true;return url;},free:(a,b)=>{FREECAM=a?[a,b]:null;},teleport,PL,ST,applyPreset,info:()=>renderer.info.render,setCam:(y,p,d)=>{camYaw=y;camPitch=p;camDist=d;},start:()=>{document.getElementById('intro').style.display='none';started=true;if(window.TTL)TTL.on=false;},vehicles,ALLEYS,composer:()=>!!composer,counts:()=>({colliders:colliders.length,lights:LIGHTS.length,blockers:blockers.length,meshes:S.children.length})};
