@@ -572,7 +572,13 @@ function roofStuff(x1,x2,z1,z2,top){
 }
 const SC_COLS=['#e8e8e8','#b52f2f','#2c3e50','#7f8c8d','#d6b33a','#1f8a7a','#c66a2a','#e48aa8','#222'];
 // V53: street displays use real GLB visuals only; no cuboid scooter/car props.
-const V53_DECOR_SCOOTERS=[];
+const V53_DECOR_SCOOTERS=[],V53_DECOR_BIKES=[];
+function decorBike(x,z,h,scale=1){
+ const g=new THREE.Group();g.position.set(x,groundY(x,z),z);g.rotation.y=h;g.scale.setScalar(scale);g.visible=false;
+ scene.add(g);
+ V53_DECOR_BIKES.push({g,pos:new THREE.Vector3(x,groundY(x,z),z),h,type:'bike',
+  speed:0,ai:false,parked:true,_v52Fallback:[],_v52Variant:Math.random()<.5?0:1,seat:[0,.68,-.22]});
+}
 function decorScooter(x,z,h){
  const g=new THREE.Group();g.position.set(x,groundY(x,z),z);g.rotation.y=h;g.visible=false;
  scene.add(g);
@@ -2046,6 +2052,7 @@ function v52LoadBikeModels(){
    V52_ASSETS[kind]=gltf.scene;V52_ASSETS.ready++;
    for(const v of vehicles)v52SetupVehicle(v);
    if(kind==='scooter')for(const v of V53_DECOR_SCOOTERS)v52SetupVehicle(v);
+   if(kind==='bicycleGreen'||kind==='bicycleRed')for(const v of V53_DECOR_BIKES)v52SetupVehicle(v);
    console.info('[三重漫遊 V53] CC0 GLB loaded:',kind);
   },undefined,err=>{
    V52_ASSETS.failed++;
@@ -2090,7 +2097,7 @@ function v53VehicleGrounding(){
   const y=groundY(v.pos.x,v.pos.z);
   v.pos.y=y;v.g.position.y=y;
  }
- for(const v of V53_DECOR_SCOOTERS){
+ for(const v of [...V53_DECOR_SCOOTERS,...V53_DECOR_BIKES]){
   v.pos.y=groundY(v.pos.x,v.pos.z);
   v.g.position.y=v.pos.y;
  }
@@ -2100,7 +2107,7 @@ function v53DecorScooterTick(frame){
  if(frame%15!==0)return;
  const x=PL.pos.x,z=PL.pos.z;
  // Static GLB scooters should not cause huge iPad draw calls.
- for(const v of V53_DECOR_SCOOTERS){
+ for(const v of [...V53_DECOR_SCOOTERS,...V53_DECOR_BIKES]){
   v.g.visible=!!v._v52Installed&&Math.abs(v.pos.x-x)<52&&Math.abs(v.pos.z-z)<52;
  }
 }
@@ -4092,7 +4099,7 @@ function pathAt2(P,s){s=((s%P.L)+P.L)%P.L;for(const g of P.segs)if(s<=g.s+g.l){c
    g.fillStyle='#2b2a27';g.fillRect(0,Hp-48,Wp,48);g.fillStyle='#5e8a52';g.fillRect(10,Hp-44,Wp-20,40);stains(g,Wp,Hp,10,.15);});
   boxR(-28,-9.6,-158,-154.6,0,13,[FO,SIDEG,ROOF,MAT_CEIL,SIDEG,SIDEG],{col:1,block:1,map:'#b8b0a2'});
   car(-7.4,-167.5,Math.PI,'#b5a27f',true);for(let i=0;i<3;i++)decorScooter(-8.2,-161+i*0.9,Math.PI/2);
-  {const bk=makeBike('#e8a1b0');bk.g.position.set(-8.4,0.15,-157.6);bk.g.rotation.y=Math.PI/2;bk.g.scale.setScalar(0.85);S.add(bk.g);}
+  {decorBike(-8.4,-157.6,Math.PI/2,.85);}
   cone(-5.6,-172.5);cone(-5.6,-171.2);}
  // ---------- 學校旁灰白窄公寓（西北角，巷子北側）＋綠色鐵皮小屋 ----------
  {const x1=-26.5,x2=-16.2,z1=-198,z2=-186.4,H=16.4;
@@ -4357,7 +4364,7 @@ function WS(cf){const{x1,x2,z1,z2,th}=cf,H=3.4,X=a=>x2-a,Z=b=>z1+b,W=z2-z1;INDOO
   const pm=new THREE.MeshLambertMaterial({map:ps,emissive:0x444444});boxR(-8.6,-8.2,-39.2,-37.6,5.4,1.6,[pm,pm,IE('#eee'),IE('#eee'),pm,pm],{cast:false});addLight(-7.6,6,-38.4,'#f2fbff',5,'sign');}
  sidewalk(x2,z1-0.3,-9,z2+0.3,'paver');
  for(let i=0;i<4;i++)decorScooter(-9.6,-24.4+i*0.9,Math.PI/2+R(-0.15,0.15));
- for(let i=0;i<3;i++){const bk=makeBike(['#2a2a2c','#e8a1b0','#3a86ff'][i]);bk.g.position.set(-8.4+i*0.15,0.15,-36.2+i*0.6);bk.g.rotation.y=Math.PI/2+0.3;bk.g.scale.setScalar(0.9);S.add(bk.g);}
+ for(let i=0;i<3;i++)decorBike(-8.4+i*.15,-36.2+i*.6,Math.PI/2+.3,.9);
  for(const z of[-31.4,-27.2]){const c=new THREE.Mesh(new THREE.ConeGeometry(0.2,0.7,12),M('#f06a2a'));c.position.set(-8.9,0.5,z);S.add(c);}
  {const gm=tex(64,96,(g,W,Hh)=>{g.fillStyle='#7ccf3a';g.fillRect(0,0,W,Hh);for(let r=0;r<3;r++)for(let k=0;k<2;k++){g.fillStyle='#e9f7d8';g.fillRect(6+k*30,8+r*30,22,22);g.fillStyle=pick(['#e63946','#3a86ff','#ffbe0b']);g.beginPath();g.arc(17+k*30,19+r*30,7,0,7);g.fill();}},false);
   const gmM=new THREE.MeshLambertMaterial({map:gm,emissive:0x222222});boxR(-9.3,-8.7,-33.9,-32.6,0.15,1.05,[gmM,IE('#7ccf3a'),IE('#7ccf3a'),IE('#7ccf3a'),IE('#7ccf3a'),IE('#7ccf3a')],{col:1,cast:false});}
@@ -4577,7 +4584,7 @@ function SHOPIN(cf){const{x1,x2,z1,z2}=cf,H=3.4,PX=cf.face!=='pz';const FL=PX?x2
   cyl(XF+0.6,0.15,147.0,0.22,0.18,0.4,M('#e8e8e4'),12);{const b=new THREE.Mesh(G_BLOB,pick(LEAFS));b.scale.set(0.35,0.6,0.35);b.position.set(XF+0.6,0.95,147);S.add(b);}
   {cyl(-8.6,0.15,135.8,0.1,0.1,5.4,M('#7d8388'),8);boxR(-8.6,0.6,135.75,135.85,5.0,0.08,M('#7d8388'),{cast:false});const s=signMat('↑ 重陽橋引道','#1f7a3a','#fff',false,0.15);vplane(-3.6,4.6,135.9,2.6,0.6,s,0);vplane(-3.6,4.6,135.7,2.6,0.6,s,Math.PI);
    const ns=tex(128,128,(g,W,Hh)=>{g.fillStyle='#fff';g.beginPath();g.arc(64,64,60,0,7);g.fill();g.strokeStyle='#d42a2a';g.lineWidth=12;g.stroke();g.beginPath();g.moveTo(20,20);g.lineTo(108,108);g.stroke();SH_TXT(g,'🚚',64,66,44,'#000','400','sans-serif');},false);vplane(-8.5,3.4,135.9,0.8,0.8,new THREE.MeshLambertMaterial({map:ns,transparent:true}),0);}
-  {const bk=makeBike('#e8b62e');bk.g.position.set(-9.2,0.15,150.6);bk.g.rotation.y=Math.PI/2;S.add(bk.g);}for(let i=0;i<4;i++)decorScooter(-9.4,151.6+i*0.9,Math.PI/2+R(-.2,.2));}
+  {decorBike(-9.2,150.6,Math.PI/2);}for(let i=0;i<4;i++)decorScooter(-9.4,151.6+i*0.9,Math.PI/2+R(-.2,.2));}
 
  // ---------- 93 巷以南：四間廢棄老房子（髒、黑水漬、鐵窗生鏽）----------
  const dirty=(W_m,H,seed)=>FX(256,Math.round(256*H/W_m),(g,e,W,Hh)=>{const s=Hh/H;g.fillStyle=pick(['#8a8478','#7d776c','#948d80','#6f6a60']);g.fillRect(0,0,W,Hh);speckle(g,W,Hh,2500,['#4a463f','#a49d90','#3a3833'],2,.15,.4);
@@ -4927,7 +4934,7 @@ function titleCam(dt){
 
 window.__v50={physics:V50_PHYS,weather:V50_REAL,refreshWeather:v50WeatherFetch};
 window.__v52={assets:V52_ASSETS,sources:V52_ASSET_SOURCES,setup:v52SetupVehicle};
-window.__v53={cars:V53_CAR_CLEAN,decorScooters:V53_DECOR_SCOOTERS,ground:v53VehicleGrounding};
+window.__v53={cars:V53_CAR_CLEAN,decorScooters:V53_DECOR_SCOOTERS,decorBikes:V53_DECOR_BIKES,ground:v53VehicleGrounding};
 window.__dbg={aim:()=>({startAim,aimStop,get AIM(){return AIM;},DIR,WALLET,SCHED}),battle:()=>({startBattle,get B(){return BATTLE;},PROF,leaveBattle,openSkills}),v6:()=>({HOOPS,BIRDS,BB,peKids,DOGS,IDLE_DOGS,setCarry,get CARRY(){return CARRY;}}),design:()=>({openDesigner,closeDesigner,AV,DOGS,IDLE_DOGS,OSTAFF,SWINGS,zoomBy,get player(){return player;}}),life:()=>({SCHED,WALLET,INTERACT,allKids,classrooms,toggleVehicle,nearestInteract}),top:(x0,z0,x1,z1,W,H)=>{const oc=new THREE.OrthographicCamera(x0,x1,-z0,-z1,1,900);oc.position.set(0,600,0);oc.up.set(0,0,-1);oc.lookAt(0,0,0);oc.position.set(0,600,0);const f=scene.fog;scene.fog=null;sky.visible=false;rain.visible=false;const sc=sun.shadow.camera;const old=[sc.left,sc.right,sc.top,sc.bottom];sc.left=-260;sc.right=260;sc.top=320;sc.bottom=-320;sc.updateProjectionMatrix();sun.position.set(-70+(x0+x1)/2,300,60+(z0+z1)/2);sun.target.position.set((x0+x1)/2,0,(z0+z1)/2);for(const p of peds)p.c.g.visible=true;renderer.setPixelRatio(1);renderer.setSize(W,H);renderer.render(scene,oc);const url=renderer.domElement.toDataURL('image/png');scene.fog=f;sky.visible=true;return url;},free:(a,b)=>{FREECAM=a?[a,b]:null;},teleport,PL,ST,applyPreset,info:()=>renderer.info.render,setCam:(y,p,d)=>{camYaw=y;camPitch=p;camDist=d;},start:()=>{document.getElementById('intro').style.display='none';started=true;if(window.TTL)TTL.on=false;},vehicles,ALLEYS,composer:()=>!!composer,counts:()=>({colliders:colliders.length,lights:LIGHTS.length,blockers:blockers.length,meshes:S.children.length})};
 </script>
 
