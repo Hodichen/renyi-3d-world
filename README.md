@@ -1,4 +1,4 @@
-# 三重漫遊 交接說明（V53｜2026/11/23）
+# 三重漫遊 交接說明（V54｜2026/11/23）
 
 一個 3D 開放世界遊戲（GTA 風格），用 Three.js r128 寫成，整個遊戲在 index.html 一個檔案裡（目前約 4600 行）。
 地點：新北市三重 仁義街 → 五華國小，照真實街景 1:1 重現。
@@ -38,6 +38,7 @@
 
 
 ## 版本歷程與部署
+- **V54（2026/11/23）**：依使用者截圖修正 GLB 來源的輪組方向：3DAssets.dev 30073/30074 的腳踏車車架長軸為 X，但輪胎網格的原始軸也沿 X，造成輪面朝錯方向；在各輪 pivot 下的 mesh 做局部 Y 軸旋轉 90°，保持 pivot 原位置，再沿正確 Z 軸滾動。機車原輪軸方向正確不旋轉。載入 GLB 後先做世界座標 Box3 接地校正，依前後輪處地面高度取較高者避免穿越人行道；碰撞翻倒與移動時，定期以模型最低點調整垂直位置，避免輪胎穿入地板。保留 E 上下車、原有真車與 NPC 系統，修正項目為 `v54TerrainUnderWheels`、`v54SnapVehicleToGround`、`v54WheelGroundTick`，並提供 `window.__v54.debug` 可供測試。**已通過 JavaScript 語法檢查，仍需 Chrome 與 iPad 實際視覺驗收。**
 - **V53（2026/11/23）**：依遊戲實拍回饋修正機車與腳踏車高度：停放車、AI 車、店外展示車以 `groundY` 地面高度定位，GLB 以車輪最低點貼地，修正長軸沿 X 的腳踏車輪旋轉方向。全面移除方塊轎車外觀：`makeCar`、`regCar` 與 `decorCar` 的方塊車不再被渲染或靜態網格合併，既有 `CARLIST` 和 `carRigUpdate` 繼續載入真實 GLB 車款；沒有真車時保持空車位，不顯示方塊替代。舊方塊路邊機車與店家展示腳踏車也改以 CC0 GLB 取代，遠處展示車做可見距離控制。保留 E 鍵上下車、WASD、交通與碰撞。注意：模型依賴 CDN 和 `cars/real`，遊玩需驗證真車載入與車體地面接觸。  
 - **V52（2026/11/23）**：以 CC0 速克達與城市腳踏車的 GLB 模型替換原本程序建模外觀；保留 `makeScooter`/`makeBike` 的騎乘及碰撞資料、E 鍵上下車、WASD、騎士坐姿。新增固定停放的腳踏車（含出生點附近），路上 AI 同樣換模型。模型透過原版 Three.js r128 `GLTFLoader` 從 3DAssets.dev 的永久 CDN 載入（無須 KTX2/Draco/Meshopt）；網路失敗自動維持舊外觀。程式參考：`V52_ASSET_SOURCES`、`v52SetupVehicle`、`v52LoadBikeModels`、`v52WheelTick`。模型僅替換外觀，不應重寫車輛物理或人物 RIG。
 
