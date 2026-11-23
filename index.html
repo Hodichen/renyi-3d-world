@@ -263,7 +263,7 @@ border:1px solid #ffb8d9;color:#fff;background:#1b132eaa;padding:11px 16px;borde
  <div id="ttFilmCaption" aria-live="polite"></div>
  <button id="ttSkip" type="button">略過片頭 ›</button>
  <div class="tt">
-  <div id="ttBuild"><span class="mini">CURRENT BUILD ・ 三重漫遊</span><strong id="ttBuildVersion">V53</strong><span class="date" id="ttBuildDate">更新日期｜2026/11/23</span></div>
+  <div id="ttBuild"><span class="mini">CURRENT BUILD ・ 三重漫遊</span><strong id="ttBuildVersion">V54</strong><span class="date" id="ttBuildDate">更新日期｜2026/11/23</span></div>
   <div class="ttLogo"><div class="ttSeal">三<br>重</div><div><div class="ttName">漫遊</div><div class="ttSub">SANCHONG AFTERGLOW ・ 仁義街 × 五華國小</div></div></div>
   <div class="ttMenu">
    <button id="ttStart" disabled><b>開始漫遊</b><i>START</i><em id="loading">建造街道中…</em></button>
@@ -1987,10 +1987,66 @@ function v52TemplateFor(v){
  if(v.type==='bike')return v._v52Variant?V52_ASSETS.bicycleRed:V52_ASSETS.bicycleGreen;
  return null;
 }
+
+/* V54 physics geometry correction: CC0 commuter-bicycle wheels were authored
+ * in the YZ plane (axle X), although the frame runs along X. Spin wheel
+ * geometry 90 degrees around local Y, then the existing frame rotation
+ * orients both upright wheel planes along the street.
+ */
+const V54_GROUND_TOL=.025;
+const V54_DEBUG={bikesCorrected:0,aligned:0,fallingLifted:0};
+function v54TerrainUnderWheels(v){
+ const half=v.type==='bike'?.54:v.type==='scooter'?.66:0;
+ if(!half)return groundY(v.pos.x,v.pos.z);
+ const dx=Math.sin(v.h||0)*half,dz=Math.cos(v.h||0)*half;
+ // Both tire contact patches must clear the higher nearby curb/sidewalk.
+ return Math.max(groundY(v.pos.x,v.pos.z),
+  groundY(v.pos.x+dx,v.pos.z+dz),groundY(v.pos.x-dx,v.pos.z-dz));
+}
+function v54SnapVehicleToGround(v,bodyOnly=false){
+ if(!v||!v._v52Installed||!v._v52Visual)return;
+ v.g.updateMatrixWorld(true);
+ const bb=new THREE.Box3().setFromObject(v._v52Visual);
+ if(!Number.isFinite(bb.min.y))return;
+ const surface=v54TerrainUnderWheels(v)+V54_GROUND_TOL;
+ const delta=surface-bb.min.y;
+ if(Math.abs(delta)<.007)return;
+ if(bodyOnly){
+  const scale=new THREE.Vector3();v.g.getWorldScale(scale);
+  v._v52Visual.position.y+=delta/Math.max(.05,Math.abs(scale.y));
+ }else{
+  v.g.position.y+=delta;
+  if(v._v50FallUntil>time)V54_DEBUG.fallingLifted++;
+ }
+ V54_DEBUG.aligned++;
+}
+function v54WheelGroundTick(frame){
+ // Impact tilting can put tire bottoms under the pavement: correct only
+ // nearby moving/fallen bikes, with sparse checks for parked bikes.
+ const focus=PL.veh?PL.veh.pos:PL.pos;
+ for(const v of vehicles){
+  if(!v._v52Installed||!v.g.visible||
+      Math.abs(v.pos.x-focus.x)>64||Math.abs(v.pos.z-focus.z)>64)continue;
+  const fallen=v._v50FallUntil>time;
+  if(!fallen&&Math.abs(v.speed)<.08&&frame%24!==0)continue;
+  v54SnapVehicleToGround(v);
+ }
+}
+
 function v52SetupVehicle(v){
  if(!v||v._v52Installed||!(v.type==='bike'||v.type==='scooter'))return;
  const prototype=v52TemplateFor(v);if(!prototype)return;
  const body=prototype.clone(true);
+ if(v.type==='bike'){
+  for(const key of ['wheel-rear','wheel-front']){
+   const pivot=body.getObjectByName(key);
+   if(!pivot)continue;
+   // Source GLB wheel plane is YZ despite bike frame running along X.
+   // Rotate the wheel mesh, NOT its pivot (which must remain at axle height).
+   for(const wheelMesh of pivot.children)wheelMesh.rotation.y+=Math.PI/2;
+  }
+  V54_DEBUG.bikesCorrected++;
+ }
  // GLBs use metres +Y; some bicycles are authored lengthwise on X.
  body.updateMatrixWorld(true);
  let bb=new THREE.Box3().setFromObject(body),sz=bb.getSize(new THREE.Vector3());
@@ -2030,6 +2086,8 @@ function v52SetupVehicle(v){
  v.g.add(body);
  (v._v52Fallback||[]).forEach(o=>o.visible=false);
  v._v52Installed=true;v._v52Visual=body;v._v52WheelParts=wheelParts;v._v52WheelAngle=0;
+ // Ground once using the fully parented model in world coordinates.
+ v54SnapVehicleToGround(v,true);
  // Original bicycles are authored lengthwise on X, so wheel axle is local Z.
  v._v52WheelAxis=new THREE.Vector3(0,0,v53LengthOnX?1:0);
  if(!v53LengthOnX)v._v52WheelAxis.set(1,0,0);
@@ -3468,7 +3526,7 @@ let last=performance.now(),frame=0,time=0,started=false,perfT=0,perfN=0,perfDone
 function loop(now){requestAnimationFrame(loop);const dt=Math.min(0.05,(now-last)/1000);last=now;time+=dt;frame++;liftRestore();
  if(started){updatePlayer(dt);updateBattle(dt);}if(typeof rigTick==='function')rigTick(dt);v53RefreshCarVisuals();v53DecorScooterTick(frame);if(!started&&typeof titleCam==='function')titleCam(dt);
  const camP=camera.position;
- updateAI(dt,camP);v52WheelTick(dt);updatePeds(dt,camP,frame);if(started)v50PhysicsTick(dt);updateSchool(dt,camP,time);updateXinbei(dt,time,camP);updateInteract(dt);for(let i=0;i<(window.__LIFE_X||1);i++)updateSchoolLife(dt,time);updateCamera(dt);updateLightFX(camP,frame);
+ updateAI(dt,camP);v52WheelTick(dt);updatePeds(dt,camP,frame);if(started)v50PhysicsTick(dt);v54WheelGroundTick(frame);updateSchool(dt,camP,time);updateXinbei(dt,time,camP);updateInteract(dt);for(let i=0;i<(window.__LIFE_X||1);i++)updateSchoolLife(dt,time);updateCamera(dt);updateLightFX(camP,frame);
  rainMat.uniforms.uT.value=time;if(finalPass)finalPass.uniforms.uTime.value=time;
  for(const c of idlers)c.head.rotation.y=Math.sin(time*0.5+c.phase)*0.4;
  if(frame%3===0){drawMap();const[a,b]=locationName(PL.pos.x,PL.pos.z);if(locEl.dataset.k!==a+b){locEl.dataset.k=a+b;locEl.innerHTML=`<b>${a}</b><span>${b}</span>`;}
@@ -4793,7 +4851,7 @@ for(const id of['ttStart','ttDesign','ttDay'])document.getElementById(id).disabl
  * Audio starts ONLY after a user click (browser autoplay policy).
  * No licensed tracks or external media files.
  */
-const GAME_META={version:'V53',updated:'2026/11/23',feature:'機車腳踏車高度校正／移除方塊車外觀'};
+const GAME_META={version:'V54',updated:'2026/11/23',feature:'修正輪胎方向與輪胎穿地／保留可騎乘車輛'};
 window.GAME_META=GAME_META;
 document.getElementById('ttBuildVersion').textContent=GAME_META.version;
 document.getElementById('ttBuildDate').textContent='更新日期｜'+GAME_META.updated;
@@ -4879,7 +4937,7 @@ function v51PlayFilm(){
   [450,'這裡，是我們的城市'],
   [3200,'仁義街・每個街角都有故事'],
   [6050,'五華國小・每天都有新冒險'],
-  [8750,'三重漫遊  V53']];
+  [8750,'三重漫遊  V54']];
  for(const [delay,title] of captions){
   V51_FILM.handles.push(setTimeout(()=>{
    if(!V51_FILM.active)return;
@@ -4935,6 +4993,7 @@ function titleCam(dt){
 window.__v50={physics:V50_PHYS,weather:V50_REAL,refreshWeather:v50WeatherFetch};
 window.__v52={assets:V52_ASSETS,sources:V52_ASSET_SOURCES,setup:v52SetupVehicle};
 window.__v53={cars:V53_CAR_CLEAN,decorScooters:V53_DECOR_SCOOTERS,decorBikes:V53_DECOR_BIKES,ground:v53VehicleGrounding};
+window.__v54={debug:V54_DEBUG,align:v54SnapVehicleToGround,terrain:v54TerrainUnderWheels};
 window.__dbg={aim:()=>({startAim,aimStop,get AIM(){return AIM;},DIR,WALLET,SCHED}),battle:()=>({startBattle,get B(){return BATTLE;},PROF,leaveBattle,openSkills}),v6:()=>({HOOPS,BIRDS,BB,peKids,DOGS,IDLE_DOGS,setCarry,get CARRY(){return CARRY;}}),design:()=>({openDesigner,closeDesigner,AV,DOGS,IDLE_DOGS,OSTAFF,SWINGS,zoomBy,get player(){return player;}}),life:()=>({SCHED,WALLET,INTERACT,allKids,classrooms,toggleVehicle,nearestInteract}),top:(x0,z0,x1,z1,W,H)=>{const oc=new THREE.OrthographicCamera(x0,x1,-z0,-z1,1,900);oc.position.set(0,600,0);oc.up.set(0,0,-1);oc.lookAt(0,0,0);oc.position.set(0,600,0);const f=scene.fog;scene.fog=null;sky.visible=false;rain.visible=false;const sc=sun.shadow.camera;const old=[sc.left,sc.right,sc.top,sc.bottom];sc.left=-260;sc.right=260;sc.top=320;sc.bottom=-320;sc.updateProjectionMatrix();sun.position.set(-70+(x0+x1)/2,300,60+(z0+z1)/2);sun.target.position.set((x0+x1)/2,0,(z0+z1)/2);for(const p of peds)p.c.g.visible=true;renderer.setPixelRatio(1);renderer.setSize(W,H);renderer.render(scene,oc);const url=renderer.domElement.toDataURL('image/png');scene.fog=f;sky.visible=true;return url;},free:(a,b)=>{FREECAM=a?[a,b]:null;},teleport,PL,ST,applyPreset,info:()=>renderer.info.render,setCam:(y,p,d)=>{camYaw=y;camPitch=p;camDist=d;},start:()=>{document.getElementById('intro').style.display='none';started=true;if(window.TTL)TTL.on=false;},vehicles,ALLEYS,composer:()=>!!composer,counts:()=>({colliders:colliders.length,lights:LIGHTS.length,blockers:blockers.length,meshes:S.children.length})};
 </script>
 
