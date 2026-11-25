@@ -552,6 +552,15 @@ window.SHOP_STYLE={
     for(let u=0.2;u<h.UL;u+=0.35)h.C(u,2.95,-0.2,0.03,0.03,0.05,new THREE.MeshBasicMaterial({color:pick(['#ff4a4a','#4aff7a','#4a8aff','#ffe04a'])}),4);}}},
  zh:{cf:{},deco:{cabinets:[[0.8,2.8,1.15,null],[7.2,9.2,1.15,null]]}},
  omy:{cf:{},deco:{}}};
+function OMY_BUILD(za,zb){const XF=-9.6;window.EXTRA_ITEMS.omy=[['堡','經典牛肉堡',99,'雙層起司','food'],['豬','厚切豬排堡',89,'酥脆多汁','food'],['麵','辣味炒泡麵',79,'加蛋','food'],['餅','鬆餅',69,'淋蜂蜜','food'],['咖','美式咖啡',50,'跑步加速 90 秒・收進背包','run'],['奶','奶茶',35,'冰涼','food']];
+ SHOPIN({x1:-19.6,x2:XF,z1:za,z2:zb,face:'px',door:[0.8,2.8],th:{key:'omy',name:'OMG BURGER 我的漢堡',hello:'「早安！A Fresh Start Of Beautiful Day～」',sub:'漢堡・早午餐・咖啡',c1:'#e8735a'},uni:'#2a2a2a',
+  sign:SDRAW.omy,signSide:'#f3efe6',wall:'#e8541e',floor:'#8a7a6c',ceil:'#2a2f36',counterU:[0.5,4.6],counterD:1.8,counter:'#d9cfc0',counterTop:'#6a4a32',menu:1,menuBg:'#2a2a2a',outer:M('#c9b8a2'),verb:'點餐',
+  extra:h=>STYLE(h,{wains:[1.1,'#c9b39a','#a08a72'],seat:'#4a2a22',top:'#efe9e0',tables:[[6.0,2.0,2],[6.0,4.0,2],[8.4,2.0,2],[8.4,4.0,2],[6.0,6.0,2],[8.4,6.0,2]],ac:[7.2],
+   art:[['B',7.2,2.2,1.6,1.0,(g,W,Hh)=>{g.fillStyle='#111';g.fillRect(0,0,W,Hh);g.fillStyle='#2a5aa8';g.fillRect(8,8,W-16,Hh-16);g.fillStyle='#d8e4f2';g.fillRect(W*0.2,Hh*0.3,W*0.25,Hh*0.5);g.fillStyle='#f2d8c8';g.fillRect(W*0.55,Hh*0.25,W*0.25,Hh*0.55);}],
+    ['B',5.6,2.2,0.7,0.9,(g,W,Hh)=>{g.fillStyle='#3a2a22';g.fillRect(0,0,W,Hh);SH_TXT(g,'BURGER',W/2,16,14,'#f2e0c8','900','sans-serif');g.fillStyle='#e9a23b';g.beginPath();g.ellipse(W/2,Hh*0.55,W*0.32,Hh*0.16,0,0,7);g.fill();g.fillStyle='#7a3a1a';g.fillRect(W*0.2,Hh*0.62,W*0.6,8);g.fillStyle='#c8302a';g.fillRect(W*0.25,Hh*0.8,W*0.5,12);}],
+    ['B',8.9,2.3,0.8,0.9,(g,W,Hh)=>{g.fillStyle='#f2c04a';g.fillRect(0,0,W,Hh);g.fillStyle='#e8735a';g.fillRect(0,Hh*0.6,W,Hh*0.4);SH_TXT(g,'DRINKS',W/2,16,14,'#3a2a22','900','sans-serif');g.fillStyle='#fff';g.fillRect(W*0.35,Hh*0.4,W*0.3,Hh*0.25);}],
+    ['L',2.4,2.3,3.4,0.9,(g,W,Hh)=>{g.fillStyle='#f6e8d8';g.fillRect(0,0,W,Hh);for(let i=0;i<5;i++){g.fillStyle=pick(['#e9a23b','#c8302a','#7ab648','#f2d070']);g.fillRect(i*W/5+6,10,W/5-12,Hh-34);g.fillStyle='#c8302a';g.fillRect(i*W/5+6,Hh-22,W/5-12,14);}}]]},{})});
+ for(let i=0;i<2;i++)decorScooter(-9.4,za+3+i*1.0,Math.PI/2);}
 // V57: 舊店面改成可以走進去 —— 登記店面範圍後，蓋到那棟樓時自動把一樓挖空（只留樓上和店面以外的一樓），店內由 SHOPIN 建
 window.HOLLOW_REQ=[
  {id:'yf',face:'px',x1:-24.5,x2:-14.5,z1:-81.2,z2:-72.9},{id:'lot',face:'px',x1:-22.5,x2:-14.5,z1:-72.3,z2:-66.7},
@@ -634,7 +643,7 @@ const walkOBB=[],mapPolys=[];
 function obbStrip(off,z1,z2,width,h,mats,opt={}){const a=LJ(off,z1),b=LJ(off,z2);const cx=(a[0]+b[0])/2,cz=(a[1]+b[1])/2,L=Math.hypot(b[0]-a[0],b[1]-a[1]);
  addBox(cx,0,cz,width,h,L,mats,{ry:JX_RY,tu:2,cast:false});if(opt.walk!==false)walkOBB.push([cx,cz,JXD.x,JXD.z,L/2,width/2,h]);
  const hw=width/2;mapPolys.push([[[a[0]-JXN.x*hw,a[1]-JXN.z*hw],[a[0]+JXN.x*hw,a[1]+JXN.z*hw],[b[0]+JXN.x*hw,b[1]+JXN.z*hw],[b[0]-JXN.x*hw,b[1]-JXN.z*hw]],opt.map||'#a9a49a']);}
-const LANEZ=[{z:4,name:'五華街93巷'},{z:65,name:'仁義街230巷'},{z:92,name:'仁義街228巷'},{z:134,name:'五華街71巷'},{z:175,name:''},{z:216,name:'仁義街220巷'}];
+const LANEZ=[{z:4,name:'五華街93巷'},{z:65,name:'仁義街230巷'},{z:92,name:'仁義街228巷'},{z:110.5,name:'仁義街226巷'},{z:134,name:'五華街71巷'},{z:175,name:''},{z:216,name:'仁義街220巷'}];
 T_ASPHALT.repeat.set(1/11,1/11);{const sh=new THREE.Shape();sh.moveTo(-175,-260);sh.lineTo(225,-260);sh.lineTo(225,440);sh.lineTo(-175,440);sh.lineTo(-175,-260);const ho=new THREE.Path();ho.moveTo(21.4,309.2);ho.lineTo(21.4,319);ho.lineTo(24.8,319);ho.lineTo(24.8,309.2);ho.lineTo(21.4,309.2);sh.holes.push(ho);const rm=new THREE.Mesh(new THREE.ShapeGeometry(sh),ROAD);rm.rotation.x=-Math.PI/2;rm.receiveShadow=true;S.add(rm);}mapRects.push([-180,-460,240,270,'#55595f']);
 const MAIN_L=[[-176,BI_Z-4],[BI_Z+4,FU_Z-3.5],[FU_Z+3.5,FH_Z-3.5],[FH_Z+3.5,ZMAX]];
 const MAIN_R=[[-176,BI_Z-4],[BI_Z+4,TH_Z-4],[TH_Z+4,ZMAX]];
@@ -754,7 +763,7 @@ function leftBlocks(){
   LANES=za>FU_Z?[[WH_X-4,WH_X+4],[-122,-117]]:[[-122,-117]];
   const n=clamp(Math.round(D/17),1,3),gap=0.8,dep=(D-gap*(n-1))/n;
   for(let k=0;k<n;k++){const z1=za+k*(dep+gap),z2=z1+dep;const f=n===1?'nzpz':k===0?'nz':k===n-1?'pz':'nzpz';
-   const cust=(Math.abs(za-(FH_Z+6.5))<0.1&&k<2)||Math.abs(za-6.5)<0.1||Math.abs(za-67.5)<0.1||Math.abs(za-94.5)<0.1||Math.abs(za-136.5)<0.1||(Math.abs(za-(BI_Z+7))<0.1&&k<2)||((Math.abs(za-(FU_Z+6.5))<0.1||Math.abs(za+173)<0.1)&&(k===0||Math.abs(za+173)<0.1));row(z1,z2,f,cust?-30:-9,XMIN,0.35,null);}}}
+   const cust=(Math.abs(za-(FH_Z+6.5))<0.1&&k<2)||Math.abs(za-6.5)<0.1||Math.abs(za-67.5)<0.1||Math.abs(za-94.5)<0.1||Math.abs(za-113)<0.1||Math.abs(za-136.5)<0.1||(Math.abs(za-(BI_Z+7))<0.1&&k<2)||((Math.abs(za-(FU_Z+6.5))<0.1||Math.abs(za+173)<0.1)&&(k===0||Math.abs(za+173)<0.1));row(z1,z2,f,cust?-30:-9,XMIN,0.35,null);}}}
 leftBlocks();
 LANES=[[-122,-117]];row(-222,-187,'pz',-54,XMIN,0.2);
 const NS_LANES=[[WH_X-4,WH_X+4],[-122,-117]];
@@ -779,7 +788,7 @@ function tower(x1,x2,z1,z2,floors,v,shopsFace){const V=TOWER_V[v];const seed=rnd
  if(shopsFace&&rnd()<0.6){const z=(z1+z2)/2+R(-6,6);const[bg,fg]=pick([['#ffffff','#1f5fa8'],['#f2c230','#1f3a6b'],['#1f5fa8','#fff']]);
   vplane(x1-0.02,4.4,z,6.5,0.8,signMat(pick(['小學美語','文心補習班','兒童才藝','安親班','藥局','咖啡','房屋仲介','眼科診所','牙醫']),bg,fg,false),-Math.PI/2);addLight(x1-1.2,4.2,z,'#fff4dd',4,'sign');}}
 function towerRun(x1,x2,za,zb,shops,list){let z=za+2;while(zb-z>16){const L=Math.min(R(24,34),zb-z-2);const xx2=Math.min(x2,jxW(z)-6.8);if(xx2-x1>16){tower(x1,xx2,z,z+L,RI(14,24),RI(0,3),shops);if(list)list.push([z,z+L]);TREE_SPOTS.push([(x1+xx2)/2,z+L+4.5,'big']);}z+=L+R(8,12);}}
-for(const[a,b]of[[BI_Z+7,TH_Z-7],[TH_Z+7,ZMAX]]){if(a===BI_Z+7)towerRun(16,41,-30,24,true,COL1);else towerRun(16,41,a,b,true,COL1);towerRun(46,JA_X-9,a,b,false);towerRun(JA_X+9,JA_X+38,a,b,false);towerRun(JA_X+44,JA_X+84,a,b,false);
+for(const[a,b]of[[BI_Z+7,TH_Z-7],[TH_Z+7,ZMAX]]){if(a===BI_Z+7)towerRun(16,41,-30,40,true,COL1);else towerRun(16,41,a,b,true,COL1);towerRun(46,JA_X-9,a,b,false);towerRun(JA_X+9,JA_X+38,a,b,false);towerRun(JA_X+44,JA_X+84,a,b,false);
  for(let t=a+3;t<b-2;t+=8.5){boxR(5.4,7.8,t-2.6,t+2.6,0.15,0.4,[CURB,CURB,grassMat(),CURB,CURB,CURB],{cast:false,col:1});TREE_SPOTS.push([6.6,t,'street']);}
  for(let t=a+4;t<b-2;t+=12){TREE_SPOTS.push([JA_X-6,t,'street']);TREE_SPOTS.push([JA_X+6,t,'street']);}}
 towerRun(102,126,-172,-136,false);
@@ -4803,12 +4812,13 @@ function SHOPIN(cf){const _ST=cf.th&&(window.SHOP_STYLE||{})[cf.th.key];if(_ST&&
   {const t=tex(96,256,(g,W,Hh)=>{g.fillStyle=PK;g.fillRect(0,0,W,Hh);vtxt(g,'美連社',W/2,50,44,'#fff',60);},false);const m=new THREE.MeshLambertMaterial({map:t,emissive:0x331122,emissiveMap:t});boxR(XF,XF+0.5,101,101.9,3.9,2.8,[m,m,m,m,m,m],{cast:false});}
   for(let i=0;i<6;i++)decorScooter(-9.4,95.2+i*0.9,Math.PI/2+R(-.2,.2));}
  // ---------- V58 依街景影片重排：71 巷以北是 329 號老公寓（一樓鐵捲門）；71 巷以南轉角依序：炸不停（鹹酥雞）→ 煮婦救心 → 小巷（投幣淨水機）→ JSP 呷上寶（下一條巷子轉角）----------
- {const z1=107.5,z2=131.5,H=12.4;
-  upper(z1,z2,H,3.6,upF(z2-z1,H-3.6,{base:'#8a857c',dirty:1,n:5,cage:0.7,cageCol:'#7a9ab8'}),upF(XF-XB,H-3.6,{base:'#8a857c',dirty:1,n:3}));back(z1,z2,-19.9);
+ {const z1=113.5,z2=131.5,H=12.4;
+  upper(z1,z2,H,3.6,upF(z2-z1,H-3.6,{base:'#8a857c',dirty:1,n:5,cage:0.7,cageCol:'#7a9ab8'}),upF(XF-XB,H-3.6,{base:'#8a857c',dirty:1,n:3}),{nz:upF(XF-XB,H-3.6,{base:'#e6e1d6',dirty:1,n:3})});back(z1,z2,-19.9);
   const G=FX(512,96,(g,e,W,Hh)=>{g.fillStyle='#4a4741';g.fillRect(0,0,W,Hh);const n=5;for(let k=0;k<n;k++){const x=k*W/n+6,w=W/n-12;g.fillStyle=pick(['#6b737a','#5d666d','#77706a']);g.fillRect(x,8,w,Hh-8);for(let y=10;y<Hh;y+=5){g.fillStyle='rgba(0,0,0,.22)';g.fillRect(x,y,w,2);}if(rnd()<0.3){g.fillStyle='#2a2826';g.fillRect(x+w*0.3,30,w*0.4,Hh-30);e.fillStyle='#ffd9a0';e.fillRect(x+w*0.3+3,33,w*0.4-6,Hh-36);}}stains(g,W,Hh,8,.15);},0.3);
-  boxR(-19.9,XF,z1,z2,0,3.6,[G,SIDEG,ROOF,MAT_CEIL,SIDEG,SIDEG],{col:1,block:1,map:'#8a857c'});
+  boxR(-19.9,XF,124.0,z2,0,3.6,[G,SIDEG,ROOF,MAT_CEIL,SIDEG,SIDEG],{col:1,block:1,map:'#8a857c'});
   addBox(XF+0.9,3.4,(z1+z2)/2,1.8,0.06,z2-z1-0.3,TM(T_CORR,{color:'#9ab0a4'}),{rz:-0.12,cast:true});
-  for(let i=0;i<9;i++)decorScooter(-9.3,109+i*1.1+R(-.1,.1),Math.PI/2+R(-.2,.2));}
+  for(let i=0;i<6;i++)decorScooter(-9.3,125+i*1.0+R(-.1,.1),Math.PI/2+R(-.2,.2));
+  OMY_BUILD(z1+0.3,123.7);}
  {const z1=136.5,z2=154.1,H=12.2;
   upper(z1,z2,H,3.6,upF(z2-z1,H-3.6,{base:'#8a857c',dirty:1,n:4,cage:0.7,cageCol:'#7a9ab8'}),SIDEG,{nz:upF(XF-XB,H-3.6,{base:'#8a857c',dirty:1,n:3})});back(z1,149.9,-19.9);
   const TILEO=TM(tex(64,64,(g,W,Hh)=>{g.fillStyle='#e6dcc6';g.fillRect(0,0,W,Hh);g.strokeStyle='#b9ad94';g.lineWidth=1;for(let y=0;y<Hh;y+=8){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();}for(let x=0;x<W;x+=16){g.beginPath();g.moveTo(x,0);g.lineTo(x,Hh);g.stroke();}},true));
@@ -4982,18 +4992,6 @@ function SHOPIN(cf){const _ST=cf.th&&(window.SHOP_STYLE||{})[cf.th.key];if(_ST&&
 // ===== V59：OMG BURGER 我的漢堡（照片：老公寓一樓、白底招牌、橘色室內）＋全家轉角細節＋手畫地圖：家長接送區、停機車、公廁、停車場、藍色美語三棟、樂獅 =====
 (window.__LATE=window.__LATE||[]).push(()=>{
  const EI=window.EXTRA_ITEMS;EI.omy=[['堡','經典牛肉堡',99,'雙層起司','food'],['豬','厚切豬排堡',89,'酥脆多汁','food'],['麵','辣味炒泡麵',79,'加蛋','food'],['餅','鬆餅',69,'淋蜂蜜','food'],['咖','美式咖啡',50,'跑步加速 90 秒・收進背包','run'],['奶','奶茶',35,'冰涼','food']];
- // 老公寓（4 樓，白磁磚＋陽台鐵窗）
- const FAC=(()=>{const[m,e]=tex2(256,256,(g,e,W,H)=>{g.fillStyle='#e6e1d6';g.fillRect(0,0,W,H);g.strokeStyle='rgba(150,145,135,.35)';for(let y=0;y<H;y+=5){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();}
-   for(let f=0;f<2;f++){const y=f*128;g.fillStyle='#3d4650';g.fillRect(14,y+24,W-28,70);if(rnd()<0.5){e.fillStyle='#ffd9a0';e.fillRect(16,y+26,W-32,66);}g.strokeStyle='#f2f2ee';g.lineWidth=3;for(let x=14;x<W-14;x+=12){g.beginPath();g.moveTo(x,y+18);g.lineTo(x,y+100);g.stroke();}g.strokeRect(12,y+16,W-24,86);g.fillStyle='#9aa0a6';g.fillRect(8,y+102,W-16,8);}stains(g,W,H,8,.08);},true);return nightEmi(TM(m,{emissiveMap:e}),0.4);})();
- const SG=M('#bdb8ad');boxR(16,30,26,41,3.54,9.6,[SG,FAC,M('#8f8a80'),MAT_CEIL,SG,SG],{tu:7,tv:6.4,block:1,map:'#c9c4b8'});boxR(26.3,30,26,41,0,3.54,SG,{col:1,block:1});sidewalk(15,26,16.01,41,'paver');
- SHOPIN({x1:16,x2:26,z1:26.3,z2:40.7,face:'nx',door:[9.0,11.0],th:{key:'omy',name:'OMG BURGER 我的漢堡',hello:'「早安！A Fresh Start Of Beautiful Day～」',sub:'漢堡・早午餐・咖啡',c1:'#e8735a'},uni:'#2a2a2a',
-  sign:SDRAW.omy,signSide:'#f3efe6',wall:'#e8541e',floor:'#8a7a6c',ceil:'#2a2f36',counterU:[0.5,4.6],counterD:1.8,counter:'#d9cfc0',counterTop:'#6a4a32',menu:1,menuBg:'#2a2a2a',outer:M('#c9b8a2'),verb:'點餐',
-  extra:h=>STYLE(h,{wains:[1.1,'#c9b39a','#a08a72'],seat:'#4a2a22',top:'#efe9e0',tables:[[6.6,2.0,4],[6.6,4.4,4],[9.2,4.4,2],[11.8,2.2,4],[11.8,4.6,2]],ac:[8.0],
-   art:[['B',10.4,2.2,1.6,1.0,(g,W,Hh)=>{g.fillStyle='#111';g.fillRect(0,0,W,Hh);g.fillStyle='#2a5aa8';g.fillRect(8,8,W-16,Hh-16);g.fillStyle='#d8e4f2';g.fillRect(W*0.2,Hh*0.3,W*0.25,Hh*0.5);g.fillStyle='#f2d8c8';g.fillRect(W*0.55,Hh*0.25,W*0.25,Hh*0.55);}],
-    ['B',7.6,2.2,0.7,0.9,(g,W,Hh)=>{g.fillStyle='#3a2a22';g.fillRect(0,0,W,Hh);SH_TXT(g,'BURGER',W/2,16,14,'#f2e0c8','900','sans-serif');g.fillStyle='#e9a23b';g.beginPath();g.ellipse(W/2,Hh*0.55,W*0.32,Hh*0.16,0,0,7);g.fill();g.fillStyle='#7a3a1a';g.fillRect(W*0.2,Hh*0.62,W*0.6,8);g.fillStyle='#c8302a';g.fillRect(W*0.25,Hh*0.8,W*0.5,12);}],
-    ['B',13.0,2.3,0.8,0.9,(g,W,Hh)=>{g.fillStyle='#f2c04a';g.fillRect(0,0,W,Hh);g.fillStyle='#e8735a';g.fillRect(0,Hh*0.6,W,Hh*0.4);SH_TXT(g,'DRINKS',W/2,16,14,'#3a2a22','900','sans-serif');g.fillStyle='#fff';g.fillRect(W*0.35,Hh*0.4,W*0.3,Hh*0.25);}],
-    ['L',2.4,2.3,3.4,0.9,(g,W,Hh)=>{g.fillStyle='#f6e8d8';g.fillRect(0,0,W,Hh);for(let i=0;i<5;i++){g.fillStyle=pick(['#e9a23b','#c8302a','#7ab648','#f2d070']);g.fillRect(i*W/5+6,10,W/5-12,Hh-34);g.fillStyle='#c8302a';g.fillRect(i*W/5+6,Hh-22,W/5-12,14);}}]]},{})});
- for(let i=0;i<4;i++)decorScooter(14.3,27.5+i*0.9,-Math.PI/2+R(-.2,.2));{const c=new THREE.Mesh(new THREE.ConeGeometry(0.2,0.7,12),M('#f06a2a'));c.position.set(15.4,0.5,26.6);S.add(c);}
  // 全家：轉角往富華街那面也有招牌帶、方形燈箱立柱、黃色公用電話、紅白柱
  {const bt=SH_IT(tex(1024,96,(g,W,H)=>{g.fillStyle='#fff';g.fillRect(0,0,W,H);g.fillStyle='#16a34a';g.fillRect(0,0,W,26);g.fillStyle='#0a74c9';g.fillRect(0,H-14,W,14);SH_TXT(g,'全佳 FamilyMark',W*0.3,H*0.56,40,'#0a74c9','900','sans-serif');},false),0.6);
   boxR(-23.6,-9.2,-37.7,-37.2,3.0,0.85,[M('#fff'),M('#fff'),M('#eee'),M('#ddd'),M('#fff'),bt],{cast:true});
