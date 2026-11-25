@@ -296,6 +296,9 @@ border:1px solid #ffb8d9;color:#fff;background:#1b132eaa;padding:11px 16px;borde
 //  基本設定
 // =====================================================================
 const isTouch=('ontouchstart' in window)||navigator.maxTouchPoints>0;
+// V60: iPad／iPhone Safari 用 ImageBitmap 解 GLB 內嵌貼圖會變全黑（three r128 的 GLTFLoader 沒排除 Safari），改走一般 Image 載入
+const IS_APPLE_WEBKIT=/Apple/.test(navigator.vendor||'')||/iPad|iPhone|iPod/.test(navigator.userAgent)||(/Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>1);
+if(IS_APPLE_WEBKIT){try{window.createImageBitmap=undefined;}catch(_){}}
 const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance',preserveDrawingBuffer:!!window.__TOPSHOT});
 let PR=Math.min(devicePixelRatio,isTouch?1.4:1.6);
 renderer.setPixelRatio(PR);renderer.setSize(innerWidth,innerHeight);
@@ -556,6 +559,29 @@ window.HOLLOW_REQ=[
  {id:'hb',face:'nz',x1:-27,x2:-15.8,z1:-121,z2:-112},{id:'hs',face:'px',x1:-25,x2:-15,z1:-145.7,z2:-136.1},{id:'my',face:'px',x1:-19.6,x2:-9.6,z1:-172.5,z2:-158.3},
  {id:'yx',face:'pz',x1:-14.4,x2:-10.6,z1:-56.5,z2:-50.47},
  {id:'zy',face:'nx',x1:17,x2:26,z1:-95.7,z2:-91.15},{id:'hy',face:'nx',x1:17,x2:26,z1:-90.85,z2:-86.15},{id:'qd',face:'nx',x1:17,x2:26,z1:-85.85,z2:-81.15},{id:'s7r',face:'nx',x1:17,x2:26,z1:-80.85,z2:-76.3}];
+Object.assign(window.SHOP_STYLE,{
+ lot:{cf:{kind:'none',wall:'#f6efe4',floor:'#c9c2b6',counterU:[0.4,3.6],counterD:4.6,counter:'#d6281e',counterTop:'#f2f2ee'},
+  deco:{wains:[0.9,'#c0392b'],tables:[[3.2,2.0,2,'high']],seat:'#d6281e',top:'#f2f2ee',tw:1.2,td:0.6,
+   art:[['L',2.4,2.0,2.4,1.0,(g,W,H)=>{g.fillStyle='#111';g.fillRect(0,0,W,H);for(let i=0;i<6;i++){g.fillStyle='#f2c12e';g.beginPath();g.arc(20+i*W/6.5,H/2,14,0,7);g.fill();SH_TXT(g,String(RI(1,49)),20+i*W/6.5,H/2,14,'#111');}}],
+    ['R',2.0,1.8,1.4,1.2,(g,W,H)=>{g.fillStyle='#d6281e';g.fillRect(0,0,W,H);SH_TXT(g,'頭獎',W/2,H*0.3,28,'#ffe14a');SH_TXT(g,'本店開出',W/2,H*0.6,18,'#fff');SH_TXT(g,'★★★',W/2,H*0.85,18,'#ffe14a');}]]}},
+ jy:{cf:{kind:'none',wall:'#f4f2ee',floor:'#b9b3a8',counterU:[2.6,4.9],counterD:6.2},
+  deco:{wains:[1.2,'#e8e4dc','#c0392b'],seat:'#c0392b',top:'#d9d6cf',tw:1.0,td:0.6,tables:[[1.2,1.6,4,'stool'],[1.2,3.6,4,'stool'],[3.6,1.6,2,'stool']],
+   art:[['B',1.2,2.4,2.0,0.6,(g,W,H)=>{g.fillStyle='#f4d03f';g.fillRect(0,0,W,H);['雞肉飯','滷蛋','味噌湯','燙青菜'].forEach((s,i)=>SH_TXT(g,s,(i+0.5)*W/4,H/2,16,'#c0392b'));}]]}},
+ mt:{cf:{kind:'none',wall:'#f4f7f0',floor:'#cfd6c4',counterU:[0.3,2.7],counterD:5.4},
+  deco:{wains:[0.9,'#3a9a48'],seat:'#d8262c',top:'#f2f2ee',tw:0.9,td:0.6,tables:[[1.5,1.6,2,'stool'],[1.5,3.4,2,'stool']],grid:1,
+   art:[['L',2.6,2.0,1.8,0.9,(g,W,H)=>{g.fillStyle='#fff';g.fillRect(0,0,W,H);g.fillStyle='#3a9a48';g.fillRect(0,0,W,16);['蛋餅','蛋堡','鐵板麵','奶茶'].forEach((s,i)=>SH_TXT(g,s,W/2,30+i*16,13,'#2e8a3e'));}]]}},
+ yx:{cf:{kind:'none',wall:'#e8dccb',floor:'#8f8a80',counterU:[0.3,2.4],counterD:4.0},
+  deco:{seat:'#d42a2a',top:'#c9ced2',tw:0.8,td:0.6,tables:[[2.8,1.4,2,'stool']],lamps:[[1.0,2.6],[2.6,2.6]],lampCol:'#d42a2a',
+   art:[['L',2.4,2.0,1.6,0.6,(g,W,H)=>{g.fillStyle='#e7dcc8';g.fillRect(0,0,W,H);SH_TXT(g,'魷魚羹 55',W/2,H/2,18,'#2a2a2a');}]],
+   ext:(h,mt)=>{const sh=SH_IT(tex(128,128,(g,W,H)=>{g.fillStyle='#2f5a9a';g.fillRect(0,0,W,H);for(let y=0;y<H;y+=5){g.fillStyle='rgba(0,0,0,.28)';g.fillRect(0,y,W,2);}},false),0.15);h.P(0.55,1.3,-0.03,1.0,2.5,sh,h.RO);h.P(h.UL-0.55,1.3,-0.03,1.0,2.5,sh,h.RO);}}},
+ jsp:{cf:{kind:'none',floor:'#c9c0b2'},deco:{wains:[1.0,'#1d1d1f','#f07a20'],seat:'#f07a20',top:'#e8e2d6',chair:'back',tables:[[1.6,1.6,2],[1.6,3.6,2],[3.8,1.6,2],[3.8,3.6,2],[6.0,1.6,2]]}},
+ s7:{cf:{},deco:{bar:[0.3,1.3,'#b88a55'],freezers:[[2.2,3.4,1.6,1]]}},
+ xx:{cf:{kind:'none',wall:'#f2e6a8',floor:'#e2dcd0',counterU:[0.4,2.8],counterD:1.8,counter:'#e7c06a',counterTop:'#2a9a96',frame:'#2a9a96',outer:M('#2a9a96')},
+  deco:{wains:[1.0,'#2a9a96'],seat:'#2f6fd6',top:'#f2f2ee',tw:1.4,td:0.5,chair:'back',tables:[[5.0,4.0,2],[5.0,5.4,2],[5.0,6.8,2],[8.0,4.0,2],[8.0,5.4,2],[8.0,6.8,2],[11.0,4.0,2],[11.0,5.4,2],[11.0,6.8,2]],
+   art:[['B',8.0,1.8,5.0,1.3,(g,W,H)=>{g.fillStyle='#f6f6f4';g.fillRect(0,0,W,H);g.strokeStyle='#9aa0a6';g.lineWidth=6;g.strokeRect(3,3,W-6,H-6);SH_TXT(g,'國語 第八課',W*0.25,H*0.3,20,'#1f5fa8');SH_TXT(g,'3x + 5 = 20',W*0.6,H*0.55,24,'#c0392b','800','sans-serif');}],
+    ['L',2.0,1.6,2.4,1.4,(g,W,H)=>{g.fillStyle='#e7c06a';g.fillRect(0,0,W,H);for(let r=0;r<4;r++)for(let c=0;c<6;c++){g.fillStyle='#f6edd6';g.fillRect(8+c*W/6.2,8+r*H/4.2,W/6.2-8,H/4.2-8);}}]]}}});
+window.EXTRA_ITEMS=Object.assign(window.EXTRA_ITEMS||{},{xx:[['國','國小作文班',1200,'每週一次','svc'],['數','國中數學班',2400,'小班教學','svc'],['英','英文單字班',1500,'背單字比賽','svc'],['安','課後安親',3500,'寫完作業再回家','svc']]});
+window.HOLLOW_REQ.push({id:'xx',face:'px',x1:-19.6,x2:-9.6,z1:31.5,z2:44.3});
 window.HOLLOW_HIT={};
 function hollowBox(cx,y0,cz,w,h,d,mat,o,hits){const BX1=cx-w/2,BX2=cx+w/2,BZ1=cz-d/2,BZ2=cz+d/2,GH=3.54;let first=null;
  const part=(x1,x2,z1,z2,ya,hb,col)=>{if(x2-x1<0.02||z2-z1<0.02||hb<0.02)return;const geo=new THREE.BoxGeometry(x2-x1,hb,z2-z1),uv=geo.attributes.uv,ps=geo.attributes.position;const ox=(x1+x2)/2,oy=y0+ya+hb/2,oz=(z1+z2)/2;
@@ -4909,12 +4935,12 @@ function SHOPIN(cf){const _ST=cf.th&&(window.SHOP_STYLE||{})[cf.th.key];if(_ST&&
   dyd:[['餅','團購餅乾',60,'一盒好分享・收進背包','item'],['麵','泡麵',25,'收進背包','item'],['衛','衛生紙',99,'團購價・收進背包','item'],['果','果乾',80,'收進背包','item'],['水','礦泉水',15,'收進背包・解渴','item']],
   mt:[['蛋','火腿蛋餅',40,'酥皮蛋餅','food'],['堡','鮪魚蛋堡',40,'早餐店經典','food'],['麵','鐵板麵',50,'黑胡椒醬','food'],['奶','奶茶',25,'早餐店奶茶','food'],['熱','熱狗',20,'炸熱狗','food'],['豆','豆漿',20,'無糖','food']],
   hb:[['堡','大帥牛肉堡',85,'招牌漢堡','food'],['雞','卡拉雞腿堡',75,'酥脆多汁','food'],['薯','薯條',40,'現炸','food'],['塊','雞塊',45,'6 塊','food'],['奶','紅茶拿鐵',40,'冰涼','food'],['咖','美式咖啡',45,'跑步加速 90 秒・收進背包','run']],
-  hs:[['油','換機油',250,'機車保養一下','food'],['胎','補胎',150,'快速修好','food'],['電','電池檢查',0,'免費檢查','food'],['帽','安全帽',600,'收進背包','item'],['衣','雨衣',150,'下雨天必備・收進背包','item']],
+  hs:[['油','換機油',250,'機車保養一下','svc'],['胎','補胎',150,'快速修好','svc'],['電','電池檢查',0,'免費檢查','svc'],['帽','安全帽',600,'收進背包','item'],['衣','雨衣',150,'下雨天必備・收進背包','item']],
   my:[['烤','烤地瓜',50,'熱呼呼又香甜','food'],['紅','台農57號地瓜（一斤）',40,'收進背包','item'],['葉','地瓜葉',30,'收進背包','item'],['球','地瓜球',35,'QQ 的','food'],['乾','地瓜乾',60,'收進背包','item']],
   yx:[['羹','魷魚羹',55,'招牌・湯頭鮮甜','food'],['麵','魷魚羹麵',65,'加麵','food'],['米','魷魚羹米粉',65,'加米粉','food'],['燙','燙魷魚',120,'沾五味醬','food'],['飯','滷肉飯',35,'小碗','food']],
-  zy:[['診','中醫看診',150,'把脈看看身體','food'],['湯','四物湯',80,'溫補','food'],['茶','青草茶',30,'消暑','food'],['膏','痠痛藥膏',120,'收進背包','item']],
-  hy:[['剪','洗剪',300,'剪完變清爽','food'],['洗','洗頭',150,'舒服','food'],['染','染髮',800,'換個髮色','food']],
-  qd:[['剪','男生理髮',200,'剪短頭髮','food'],['刮','修面',100,'刮鬍子','food'],['平','平頭',150,'夏天好整理','food']]});
+  zy:[['診','中醫看診',150,'把脈看看身體','svc'],['湯','四物湯',80,'溫補','food'],['茶','青草茶',30,'消暑','food'],['膏','痠痛藥膏',120,'收進背包','item']],
+  hy:[['剪','洗剪',300,'剪完變清爽','svc'],['洗','洗頭',150,'舒服','svc'],['染','染髮',800,'換個髮色','svc']],
+  qd:[['剪','男生理髮',200,'剪短頭髮','svc'],['刮','修面',100,'刮鬍子','svc'],['平','平頭',150,'夏天好整理','svc']]});
  const SD=(bg,fg,t,sub,acc)=>(g,W,H)=>{g.fillStyle=bg;g.fillRect(0,0,W,H);if(acc){g.fillStyle=acc;g.fillRect(0,H-12,W,12);}SH_TXT(g,t,W/2,H*0.46,Math.min(64,W*0.8/t.length),fg);if(sub){g.font=`700 18px ${FONT}`;g.fillStyle=fg;g.textAlign='right';g.fillText(sub,W-20,H-22);}};
  const G2=new THREE.MeshLambertMaterial({color:'#2a2d30'});
  SHOPIN({x1:-24.5,x2:-14.5,z1:-81.2,z2:-72.9,face:'px',door:[3.4,5.0],kind:'breakfast',th:{key:'yf',name:'妘芳早午餐',hello:'「早安！今天想吃什麼？」',sub:'早午餐・豬排堡・鮮奶茶',c1:'#e8692c'},uni:'#e8692c',
@@ -4991,6 +5017,26 @@ function SHOPIN(cf){const _ST=cf.th&&(window.SHOP_STYLE||{})[cf.th.key];if(_ST&&
   for(let i=0;i<3;i++){const x1=78+i*7.6,x2=x1+7,z1=-172.5,z2=-156;boxR(x1,x2,z1,z2,0,13,[M('#c9d2dc'),M('#c9d2dc'),M('#7d8a96'),MAT_CEIL,M('#c9d2dc'),BL],{tu:7,tv:6.4,col:1,block:1,map:'#4a7ab8'});
    vplane((x1+x2)/2,3.7,z1-0.03,6,0.9,signMat(i===1?'藍天美語 Sky English':'藍天美語','#1f5fa8','#fff',false,0.25),Math.PI);vplane((x1+x2)/2,1.6,z1-0.03,3,2.4,new THREE.MeshLambertMaterial({color:'#bfe0f0',emissive:0x22303a}),Math.PI);addLight((x1+x2)/2,3.6,z1-1.2,'#eef6ff',5,'sign');}}
  {const t=signMat('樂獅 兒童體能館','#e8731e','#fff',false,0.25);vplane(56,4.2,-121.95,10,1.0,t,Math.PI);addLight(56,4,-123,'#fff0d8',5,'sign');}
+});
+// ===== V60：其餘店家室內各自不同、全家窗邊吧台、新學森補習班可進去、仁義街東側林蔭道＋葛拉芭朵藝術學苑、莫內特廣場路燈花台 =====
+(window.__LATE=window.__LATE||[]).push(()=>{
+ SHOPIN({x1:-19.6,x2:-9.6,z1:31.5,z2:44.3,face:'px',door:[7.8,9.6],th:{key:'xx',name:'新學森文理補習班',hello:'「同學，要報名嗎？」',sub:'國中部・國小部・課後安親',c1:'#1f8a86'},uni:'#2a9a96',verb:'報名課程',menu:1,menuBg:'#1f8a86',signSide:'#1f8a86',
+  sign:(g,W,H)=>{g.fillStyle='#1f8a86';g.fillRect(0,0,W,H);SH_TXT(g,'新 學 森 文 理 補 習 班',W*0.45,H/2,54,'#f4e6c8');SH_TXT(g,'國中部',W*0.92,H*0.3,18,'#f4e6c8');SH_TXT(g,'國小部',W*0.92,H*0.7,18,'#f4e6c8');}});
+ // 全家：窗邊吧台＋高腳椅、冰櫃、咖啡豆壁畫
+ {const xF=-9.6;boxR(xF-0.95,xF-0.5,-36.8,-32.4,1.0,0.05,M('#b88a55'),{col:1});for(let z=-36.4;z<-32.6;z+=0.75){cyl(xF-1.3,0.16,z,0.025,0.035,0.62,M('#8a7a6a'),5);cyl(xF-1.3,0.78,z,0.18,0.18,0.05,M('#b07a4a'),12);}
+  boxR(xF-3.4,xF-2.6,-36.6,-34.2,0.16,0.8,M('#f4f4f2'),{col:1});boxR(xF-3.35,xF-2.65,-36.55,-34.25,0.96,0.04,new THREE.MeshLambertMaterial({color:'#bfe3f0',emissive:0x223a44}));
+  const art=SH_IT(tex(256,128,(g,W,H)=>{g.fillStyle='#e8ecef';g.fillRect(0,0,W,H);g.strokeStyle='#b9c2c8';for(let i=0;i<8;i++){g.beginPath();g.moveTo(R(0,W),R(0,H));g.lineTo(R(0,W),R(0,H));g.stroke();}g.fillStyle='#5a8a3a';g.beginPath();g.ellipse(W*0.6,H*0.3,30,12,0.4,0,7);g.fill();for(let i=0;i<5;i++){g.fillStyle='#c8302a';g.beginPath();g.arc(W*0.55+i*10,H*0.45+(i%2)*8,7,0,7);g.fill();}for(let i=0;i<9;i++){g.fillStyle='#6a4428';g.beginPath();g.ellipse(W*0.2+i*9,H*0.7+(i%3)*6,6,4,0.5,0,7);g.fill();}},false),0.3);
+  vplane(-12.5,2.0,-37.0,3.0,1.5,art,0);}
+ // 仁義街東側林蔭道（影片二 381~407 號）：建築側第二排大樹＋綠籬
+ for(let z=-34;z<24;z+=7){if(Math.abs(z-(-5))<3)continue;tree(13.6,z,1.35,'big');boxR(12.6,14.6,z-1,z+1,0.15,0.35,[CURB,CURB,grassMat(),CURB,CURB,CURB],{cast:false,col:1});}
+ for(let z=-36;z<24;z+=3.4){if(Math.abs(z-(-5))<4)continue;boxR(15.1,15.7,z,z+2.8,0.15,0.75,M('#3f7a35'),{cast:true});}
+ // 葛拉芭朵藝術學苑（黃光玻璃店面＋黑色招牌）
+ {const z0=-8.5,z1=-1.5;const sf=nightEmi(TM(tex(512,256,(g,W,H)=>{g.fillStyle='#1d1d1f';g.fillRect(0,0,W,H*0.28);SH_TXT(g,'葛拉芭朵藝術學苑',W*0.45,H*0.1,28,'#fff');SH_TXT(g,'GRABADO ART STUDIO',W*0.45,H*0.21,14,'#ddd','800','sans-serif');g.fillStyle='#e8392e';g.beginPath();g.arc(W*0.06,H*0.14,18,0,7);g.fill();
+   g.fillStyle='#f2d84a';g.fillRect(10,H*0.32,W-20,H*0.66);for(let i=0;i<6;i++){g.fillStyle=pick(['#e8735a','#5a8ac8','#7ab648','#c86ab0']);g.fillRect(30+i*78,H*0.45,50,H*0.3);}g.strokeStyle='#2a2a2a';g.lineWidth=6;for(let x=10;x<W;x+=W/4){g.beginPath();g.moveTo(x,H*0.32);g.lineTo(x,H);g.stroke();}},false),{}),0.7);
+  vplane(15.97,1.9,(z0+z1)/2,z1-z0,3.6,sf,-Math.PI/2);addLight(14.5,2.6,(z0+z1)/2,'#ffe8a0',6,'shop');}
+ // 莫內特（248 號）廣場：黑色社區路燈、紅磚花台綠籬
+ for(const z of[-62,-54,-46]){cyl(20.5,0.16,z,0.06,0.08,3.6,M('#232527'),8);boxR(20.3,20.7,z-0.2,z+0.2,3.76,0.45,LAMP_WARM,{cast:false});addLight(20.5,3.9,z,'#ffd9a0',5,'lamp');addCol(20.4,z-0.1,20.6,z+0.1);
+  boxR(17.2,19.4,z+1.2,z+3.4,0.15,0.5,M('#b5563e'),{col:1,cast:false});boxR(17.35,19.25,z+1.35,z+3.25,0.65,0.4,M('#3f7a35'),{});for(let k=0;k<4;k++){const f=new THREE.Mesh(G_BLOB,M('#c8303a'));f.scale.setScalar(0.12);f.position.set(17.6+k*0.5,1.1,z+2.3+R(-.4,.4));S.add(f);}}
 });
 // ===== 進安公園：星座羅盤廣場（照影片）、垃圾桶 =====
 {const cx=38.5,cz=-151.5,Rr=3.6;const t=tex(512,512,(g,W,H)=>{const c=W/2;g.fillStyle='#b9b6ae';g.fillRect(0,0,W,H);
@@ -5108,6 +5154,7 @@ const STORE_ITEMS={fm:[['蛋','茶葉蛋',13,'滷得入味・吃了心情好','f
  s7:[['冰','思樂冰',35,'冰涼消暑・跑步加速 60 秒・收進背包','run60'],['堡','大亨堡',45,'經典熱狗','food'],['飯','三角飯糰',30,'鮭魚口味','food'],['咖','城市咖啡（美式）',45,'跑步加速 90 秒・收進背包','run'],['蛋','茶葉蛋',13,'滷得入味','food'],['糖','棒棒糖',10,'收進背包','item'],['水','礦泉水',20,'收進背包・解渴','item'],['報','今日報紙',15,'看看三重新聞','news']]};
 function buy(n,p,k){if(WALLET.money<p){toast('零用錢不夠了…（賺錢的方法之後會加入）',2.6);return;}WALLET.money-=p;
  if(k==='food'){toast(`買了${n}（${p} 元），吃完精神變好了！`,2.4);if(typeof gainExp==='function')gainExp(2,'吃東西');}
+ else if(k==='svc'){toast(`${n} 完成！（${p} 元）`,2.4);if(typeof gainExp==='function')gainExp(1,'服務');}
  else if(k==='news'){toast('今日頭條：三重仁義街新開一家早午餐，五華國小運動會即將登場。',3.6);}
  else{INV[n]=(INV[n]||0)+1;toast(`${n} 收進背包了（${p} 元）`,2.2);}}
 function useItem(n){if(!INV[n])return;INV[n]--;if(!INV[n])delete INV[n];
@@ -5132,7 +5179,7 @@ for(const id of['ttStart','ttDesign','ttDay'])document.getElementById(id).disabl
  * Audio starts ONLY after a user click (browser autoplay policy).
  * No licensed tracks or external media files.
  */
-const GAME_META={version:'V59',updated:'2026/11/25',feature:'每間店室內照照片／炸不停＋煮婦救心合成攤販／我的漢堡／學校前家長接送區'};
+const GAME_META={version:'V60',updated:'2026/11/25',feature:'修好 iPad 人物變黑／其餘店家室內各不同／補習班可進去／東側林蔭道'};
 window.GAME_META=GAME_META;
 document.getElementById('ttBuildVersion').textContent=GAME_META.version;
 document.getElementById('ttBuildDate').textContent='更新日期｜'+GAME_META.updated;
