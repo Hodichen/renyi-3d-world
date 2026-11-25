@@ -5015,7 +5015,7 @@ function SHOPIN(cf){const _ST=cf.th&&(window.SHOP_STYLE||{})[cf.th.key];if(_ST&&
   for(let x=X1+1.8,i=0;x<X2-1;x+=2.6,i++)if(i!==2){const c=makeCar(pick(CAR_COLS));c.g.position.set(x,0.15,Z1+2.6);c.g.rotation.y=i%2?0:Math.PI;scene.add(c.g);}}
  {const BL=(()=>{const[m,e]=tex2(256,256,(g,e,W,H)=>{g.fillStyle='#4a7ab8';g.fillRect(0,0,W,H);for(let f=0;f<2;f++){const y=f*128;g.fillStyle='#e8eef4';g.fillRect(20,y+24,W-40,70);g.fillStyle='#2a3a4a';g.fillRect(26,y+30,W-52,58);if(rnd()<0.5){e.fillStyle='#fff1d0';e.fillRect(26,y+30,W-52,58);}g.fillStyle='#e8eef4';g.fillRect(0,y+110,W,8);}},true);return nightEmi(TM(m,{emissiveMap:e}),0.4);})();
   for(let i=0;i<3;i++){const x1=78+i*7.6,x2=x1+7,z1=-172.5,z2=-156;boxR(x1,x2,z1,z2,0,13,[M('#c9d2dc'),M('#c9d2dc'),M('#7d8a96'),MAT_CEIL,M('#c9d2dc'),BL],{tu:7,tv:6.4,col:1,block:1,map:'#4a7ab8'});
-   vplane((x1+x2)/2,3.7,z1-0.03,6,0.9,signMat(i===1?'藍天美語 Sky English':'藍天美語','#1f5fa8','#fff',false,0.25),Math.PI);vplane((x1+x2)/2,1.6,z1-0.03,3,2.4,new THREE.MeshLambertMaterial({color:'#bfe0f0',emissive:0x22303a}),Math.PI);addLight((x1+x2)/2,3.6,z1-1.2,'#eef6ff',5,'sign');}}
+   vplane((x1+x2)/2,3.7,z1-0.03,6,0.9,signMat(i===1?'弋菓美語 EGO English':'弋菓美語','#1f5fa8','#fff',false,0.25),Math.PI);vplane((x1+x2)/2,1.6,z1-0.03,3,2.4,new THREE.MeshLambertMaterial({color:'#bfe0f0',emissive:0x22303a}),Math.PI);addLight((x1+x2)/2,3.6,z1-1.2,'#eef6ff',5,'sign');}}
  {const t=signMat('樂獅 兒童體能館','#e8731e','#fff',false,0.25);vplane(56,4.2,-121.95,10,1.0,t,Math.PI);addLight(56,4,-123,'#fff0d8',5,'sign');}
 });
 // ===== V60：其餘店家室內各自不同、全家窗邊吧台、新學森補習班可進去、仁義街東側林蔭道＋葛拉芭朵藝術學苑、莫內特廣場路燈花台 =====
