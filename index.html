@@ -337,7 +337,7 @@ function TM(map,opt){return new THREE.MeshLambertMaterial(Object.assign({map},op
 const PAINT=(color,extra)=>new THREE.MeshLambertMaterial(Object.assign({color,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-4},extra||{}));
 function mkTex(c,rep){const t=new THREE.CanvasTexture(c);if(rep)t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=ANISO;return t;}
 // V58: iPad／手機上大張的程式貼圖用一半解析度（夜間發光圖再減半），顯示卡記憶體少一大半，走動、進店比較不卡
-const TEXK=(w,h)=>isTouch&&w*h>65536?0.5:1;
+const TEXK=(w,h)=>isTouch&&w*h>=32768?(w*h>=1048576?0.25:0.5):1;/*V63b：iPad 貼圖記憶體不夠時建築會變黑，觸控裝置 256x256 以上就減半*/
 function tex(w,h,draw,rep=true){const k=TEXK(w,h),c=document.createElement('canvas');c.width=Math.max(1,Math.round(w*k));c.height=Math.max(1,Math.round(h*k));const g=c.getContext('2d');if(k!==1)g.scale(k,k);draw(g,w,h);return mkTex(c,rep);}
 function tex2(w,h,draw,rep=true){const k=TEXK(w,h),k2=k<1?k*0.5:1,a=document.createElement('canvas'),b=document.createElement('canvas');a.width=Math.max(1,Math.round(w*k));a.height=Math.max(1,Math.round(h*k));b.width=Math.max(1,Math.round(w*k2));b.height=Math.max(1,Math.round(h*k2));
  const g=a.getContext('2d'),e=b.getContext('2d');if(k!==1)g.scale(k,k);if(k2!==1)e.scale(k2,k2);e.fillStyle='#000';e.fillRect(0,0,w,h);draw(g,e,w,h);return[mkTex(a,rep),mkTex(b,rep)];}
