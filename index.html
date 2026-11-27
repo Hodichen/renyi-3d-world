@@ -833,18 +833,19 @@ function row(z1,z2,faceZ,xStart=-9,xEnd=XOLD,cornerShops=0.4,firstOpt=null){
 function leftBlocks(){
  const bands=[[-186,-173],[BI_Z-7,BI_Z+7],[FU_Z-6.5,FU_Z+6.5],[FH_Z-6.5,FH_Z+6.5]];for(const l of LANEZ)bands.push([l.z-2.5,l.z+2.5]);bands.push([ZMAX,ZMAX+10]);bands.sort((a,b)=>a[0]-b[0]);
  for(let i=0;i<bands.length-1;i++){const za=bands[i][1],zb=bands[i+1][0];const D=zb-za;if(D<6)continue;
-  LANES=za>55?[[WH_X-4,WH_X+4]]:[];const xE=(za>=94&&zb<=132)?WH_X+4:XOLD;
+  LANES=za>55?[[WH_X-4,WH_X+4]]:[];const xE=(Math.abs(za-67.5)<0.1)?WH_X+4:XOLD;
   const n=clamp(Math.round(D/17),1,3),gap=0.8,dep=(D-gap*(n-1))/n;
   for(let k=0;k<n;k++){const z1=za+k*(dep+gap),z2=z1+dep;const f=n===1?'nzpz':k===0?'nz':k===n-1?'pz':'nzpz';
+   if(Math.abs(za-6.5)<0.1&&k===0){row(9.5,z2,f,-30,xE,0.35,null);continue;}/*V63：93巷 x<-30 加寬到 8m*/
    const cust=(Math.abs(za-(FH_Z+6.5))<0.1&&k<2)||Math.abs(za-6.5)<0.1||Math.abs(za-67.5)<0.1||Math.abs(za-94.5)<0.1||Math.abs(za-113)<0.1||Math.abs(za-136.5)<0.1||(Math.abs(za-(BI_Z+7))<0.1&&k<2)||((Math.abs(za-(FU_Z+6.5))<0.1||Math.abs(za+173)<0.1)&&(k===0||Math.abs(za+173)<0.1));row(z1,z2,f,cust?-30:-9,xE,0.35,null);}}}
 leftBlocks();
 LANES=[];row(-222,-187,'pz',-54,XOLD,0.2);
 const NS_LANES=[[WH_X-4,WH_X+4]];
 for(const l of LANEZ)ALLEYS.push({z:l.z,name:l.name||'巷弄'});
-ALLEYS.forEach(a=>{if(a.name!=='巷弄')streetPlate(-5.5,a.z+2.9,a.name,'#1f4f8a',Math.PI/2);
- for(let x=-14;x>XOLD+4;x-=R(13,19)){if(NS_LANES.some(l=>x>l[0]-1&&x<l[1]+1))continue;const side=rnd()<0.5?1:-1;wallLamp(x,a.z+side*2.5,0,-side);}
- for(let x=-11;x>XOLD+3;){if(NS_LANES.some(l=>x>l[0]-1.5&&x<l[1]+1.5)){x-=2;continue;}
-  if(rnd()<0.45){const n=RI(2,6);const side=rnd()<0.5?1:-1;for(let k=0;k<n&&x>XOLD+3;k++){decorScooter(x,a.z+side*1.5,side>0?0:Math.PI);x-=0.85;}}
+ALLEYS.forEach(a=>{if(a.name!=='巷弄')streetPlate(-5.5,a.z+2.9,a.name,'#1f4f8a',Math.PI/2);const XL=a.z===4?-30:a.z===92?WH_X-4:XOLD;/*V63：93巷西段另外做、228巷到公園為止*/
+ for(let x=-14;x>XL+4;x-=R(13,19)){if(NS_LANES.some(l=>x>l[0]-1&&x<l[1]+1))continue;const side=rnd()<0.5?1:-1;wallLamp(x,a.z+side*2.5,0,-side);}
+ for(let x=-11;x>XL+3;){if(NS_LANES.some(l=>x>l[0]-1.5&&x<l[1]+1.5)){x-=2;continue;}
+  if(rnd()<0.45){const n=RI(2,6);const side=rnd()<0.5?1:-1;for(let k=0;k<n&&x>XL+3;k++){decorScooter(x,a.z+side*1.5,side>0?0:Math.PI);x-=0.85;}}
   x-=R(1.5,6);}});
 for(const c of[BI_Z,FU_Z,FH_Z]){for(let x=-12;x>XOLD+3;){if(NS_LANES.some(l=>x>l[0]-1.5&&x<l[1]+1.5)){x-=2;continue;}if(rnd()<0.3){const n=RI(2,5);for(let k=0;k<n;k++){decorScooter(x,c+(c===BI_Z?5.5:5),0);x-=0.85;}}x-=R(2,8);}}
 
@@ -3554,7 +3555,7 @@ function locationName(x,z){
  if(x<-5&&Math.abs(z-FU_Z)<7)return['富福街','新北市三重區'];if(x<-5&&Math.abs(z-FH_Z)<7)return['富華街','新北市三重區'];
  if(x>5&&Math.abs(z-TH_Z)<7)return['通華街','新北市三重區'];
  if(x<-276&&typeof WH2!=='undefined'){if(x<WH2.FW&&z<-135&&z>-381)return['碧華國小','五華街'];let best=null,bd=9;for(const sh of WH2.shops){const d=Math.hypot(x-sh.x,z-sh.z);if(d<bd){bd=d;best=sh;}}if(Math.abs(x-WH2.X)<9||best)return['五華街',best?best.n:'三重 老街區'];}
- if(x>WH_X-4&&x<WH_X+4&&z>60)return['巷弄','老社區'];if(x<-76&&x>-150&&z>94&&z<132)return['五華公園','五華街／仁義街之間'];
+ if(x>WH_X-4&&x<WH_X+4&&z>60)return['巷弄','老社區'];if(x<-76&&x>-181&&z>67&&z<95)return['五華公園','仁義街228巷／五華街87巷'];if(x<-181&&x>-186&&z>37&&z<95)return['五華街87巷37弄','五華公園旁'];
  for(const a of ALLEYS)if(Math.abs(z-a.z)<3&&x<-8)return[a.name,'公寓巷弄'];
  if(Math.abs(x)<16)return['仁義街',x<0?'左側 老公寓':'右側 重劃區大樓'];
  return[x<0?'三重 老社區':'三重 重劃區','新北市三重區'];}
@@ -5228,7 +5229,7 @@ const WH2={X:-318,FE:-307,FW:-329,AD:2.6,SD:9.6,BD:15,GH:3.54,shops:[]};
   [89,42.5,[[8.5,'早點小籠包豆漿店','food','#c8302a','#fff','早餐・消夜・點心',{fl:5,fv:PINK2,band:'#1f5fa8',up:['勝學補習班','#2a8a4a','#fff']}],[6.5,'國晶眼鏡','optical','#1f6a3a','#f2d070','',{fl:6,fv:PINK,v:['國晶眼鏡','#1f6a3a','#f2d070']}],
    [5.5,'八方雲聚鍋貼','food','#f2c12e','#c8302a','鍋貼・水餃',{v:['八方雲聚','#f2c12e','#c8302a'],kit:1}],[5,'好寶手工饅頭','food','#f2e04a','#1f5fa8','',{}],[5.5,'上海排骨麵','food','#c8302a','#fff','排骨・牛肉麵',{}],
    [3.6,'公寓','door'],[9.5,'全佳 FamilyMark','conv','#ffffff','#0a74c9','',{fl:7,fv:PINK2,band:'#16a34a',band2:'#0a74c9',big:'五華大街'}]]],
-  [37.5,6.5,[[6.5,'日藥本鋪','pharm','#e5202e','#fff','藥妝・日本藥品',{fl:5,fv:PINK}],[9.5,'麥當樂','fast','#c8302a','#f2c12e','24 小時營業',{fl:5,fv:BROWN,dark:1}],[4.2,'上虹小火鍋','food','#c9a0c8','#c8302a','',{}],
+  [37.5,9.5,[[6.5,'日藥本鋪','pharm','#e5202e','#fff','藥妝・日本藥品',{fl:5,fv:PINK}],[9.5,'麥當樂','fast','#c8302a','#f2c12e','24 小時營業',{fl:5,fv:BROWN,dark:1}],[4.2,'上虹小火鍋','food','#c9a0c8','#c8302a','',{}],
    [3.8,'OPPA 手機','phone','#2f8a4a','#fff','',{}],[3.6,'全正通訊','phone','#f2f2ee','#1f6a3a','門號申辦・續約',{v:['全正通訊','#fff','#c8302a']}],[3.9,'藏老滷','deli','#1d1d1f','#e8b62e','',{}]]],
   [1.5,-37.5,[[5.5,'鬧熱牛肉麵','food','#1f3a8a','#fff','',{}],[6,'新姿生藥局','pharm','#e5202e','#fff','NZS',{}],[5.5,'TRUE WON 初韻','tea','#fff','#1d1d1f','手搖飲',{band:'#f2c12e'}],[3.6,'公寓','door'],
    [6,'小說漫畫','books','#f4f4f2','#1d1d1f','租書・漫畫',{}],[7.5,'大苑仔','tea','#2a8a3a','#fff','水果茶',{fl:4,fv:WHITE}]]],
@@ -5247,8 +5248,10 @@ const WH2={X:-318,FE:-307,FW:-329,AD:2.6,SD:9.6,BD:15,GH:3.54,shops:[]};
  const W=[
   [89,26.5,[[6,'老瀨茶棧','tea','#1d1d1f','#e0c070','LIKE TEA SHOP',{fl:4,fv:TAN,gold:1}],[6,'三華生活坊','clothes','#1f3a8a','#fff','襪子・內衣',{fl:4,fv:TAN,up:['朗德利自助洗衣','#1f5fa8','#fff']}],[4,'朗德利自助洗衣','laundry','#1f5fa8','#fff','',{}],
    [12,'家樂褔超市','market','#f06a2a','#fff','24h營業',{fl:5,fv:PINK,v:['頂好補習班','#2a8a4a','#fff']}],[6.5,'龍憶眼鏡','optical','#c8302a','#fff','驗光所',{v:['龍憶眼鏡','#c8302a','#fff']}],[5,'阿珠早餐','food','#f2c12e','#c8302a','',{}],[3.6,'公寓','door']]],
-  [21.5,-37.5,[[9,'華秦銀行','bank','#e5202e','#fff','HWATAI BANK',{fl:5,fv:BRICK}],[8,'康適美藥局','pharm','#e5202e','#fff','',{v:['康適美','#e5202e','#fff']}],[4,'小楊檳榔','betel','#e85a9a','#fff','',{}],[3.6,'公寓','door'],
-   [7,'美麗康皮膚科診所','clinic','#2a9a8a','#fff','皮膚病・醫學美容',{}],[6,'維安連鎖藥局','pharm','#2a8a4a','#fff','',{v:['維安藥局','#2a8a4a','#fff']}],[5,'子烈診所','clinic','#2a8a4a','#fff','家醫科',{}],[5,'森 Hair Studio','salon','#3ab04a','#fff','',{}],[4.6,'CoGo 都可','tea','#e8541e','#fff','',{}]]],
+  [21.5,7.5,[[5.5,'華秦銀行','bank','#e5202e','#fff','HWATAI BANK',{fl:5,fv:BRICK}],[4.5,'康適美藥局','pharm','#e5202e','#fff','',{v:['康適美','#e5202e','#fff']}],
+   [5,'美麗康皮膚科診所','clinic','#2a9a8a','#fff','皮膚病・醫學美容',{fl:5,fv:WHITE}]]],
+  [2.5,-37.5,[[7,'維安連鎖藥局','pharm','#1f6a5a','#fff','',{fl:5,fv:PINK,band:'#c8302a',v:['維安連鎖藥局','#1f6a5a','#fff']}],[5,'子烈診所','clinic','#2a8a4a','#fff','家醫科',{}],[5,'森 Hair Studio','salon','#3ab04a','#fff','',{}],[4.6,'CoGo 都可','tea','#e8541e','#fff','',{}],
+   [4,'小楊檳榔','betel','#e85a9a','#fff','',{}],[3.6,'公寓','door'],[6,'阿嬤的店','food','#f2c12e','#c8302a','米粉湯・黑白切',{}]]],
   [-50.5,-81.5,[[6,'傳統鱔魚麵','food','#f2f2ee','#c8302a','',{fl:4,fv:WHITE}],[6,'布莉斯義大利麵','food','#1f3a6a','#fff','BLISS PESTO',{}],[8,'中華電訊','phone','#1f5fa8','#fff','Chunghwa',{v:['中華電訊','#fff','#1f5fa8']}],[5,'神瑙數位','phone','#1f5fa8','#fff','senao',{}],[4.5,'五華補習班','school','#5a2a7a','#fff','',{}]]],
   [-94.5,-121,[[8,'7-TEN 七拾便利','conv','#ffffff','#008061','五華門市',{fl:5,fv:BEIGE,band:'#f58220',band2:'#e5202e'}],[6.5,'滿滿牛肉麵','food','#f4f2ee','#5a5a5a','鮮豆漿・麥香紅茶免費暢飲',{band:'#c8302a'}],[4.8,'COMEBAY','tea','#c8203a','#fff','',{}],[5,'陳家飯糰','food','#f2c12e','#5a2a1a','',{v:['陳家飯糰','#f2c12e','#5a2a1a']}]]]];
  // ---------- 建造 ----------
@@ -5319,8 +5322,8 @@ const WH2={X:-318,FE:-307,FW:-329,AD:2.6,SD:9.6,BD:15,GH:3.54,shops:[]};
   for(const[side,xa,xb]of[[1,FE,FE+BD],[-1,FW-BD,FW]])for(let z=95;z<ZMAX-6;z+=rr(8,13)){const z2=Math.min(ZMAX-6,z+rr(7,12));if(Math.abs(z-134)<4||Math.abs(z2-134)<4||(z<134&&z2>134))continue;const f=FACS[RI(0,APT_FAC.length-1)];const ms=[SIDEM,SIDEM,ROOFM,MAT_CEIL,SIDEM,SIDEM];ms[side>0?1:0]=f;boxR(xa,xb,z,z2,0,GH+RI(3,5)*3.2,ms,{tu:6,tv:3.2,col:1,block:1,map:MAPC});z=z2;}
  }
  // ---------- 道路：人行道、標線、斑馬線、機車格 ----------
- const CROSS=[[92,3,'仁愛街425巷／五華街75巷'],[37.5+2.5,2.5,'五華街87巷'],[4,2.5,'五華街93巷'],[FH_Z,3.5,'富華街'],[FU_Z,3.5,'富福街'],[BI_Z,4,'碧華街'],[FR_Z,4,'五華街141巷'],[-250,3,'五華街163巷'],[-388,4,'溪尾街']];
- const WCROSS=[[92,3],[24,2.5],[FH_Z,3.5],[FU_Z,3.5],[BI_Z,4]];
+ const CROSS=[[92,3,'仁愛街425巷／五華街75巷'],[37.5+2.5,2.5,'五華街87巷'],[5.5,4,'五華街93巷'],[FH_Z,3.5,'富華街'],[FU_Z,3.5,'富福街'],[BI_Z,4,'碧華街'],[FR_Z,4,'五華街141巷'],[-250,3,'五華街163巷'],[-388,4,'溪尾街']];
+ const WCROSS=[[92,3],[24,2.5],[5,2.5],[FH_Z,3.5],[FU_Z,3.5],[BI_Z,4]];
  const gapsE=CROSS.map(c=>[c[0]-c[1]-0.01,c[0]+c[1]+0.01]),gapsW=WCROSS.map(c=>[c[0]-c[1],c[0]+c[1]]);
  const segs=(gaps,a,b)=>{const s=[];let z=a;for(const[g1,g2]of[...gaps].sort((p,q)=>p[0]-q[0])){if(g2<a||g1>b)continue;if(g1>z)s.push([z,g1]);z=Math.max(z,g2);}if(z<b)s.push([z,b]);return s;};
  for(const[a,b]of segs(gapsE,-392,ZMAX))sidewalk(X+7,a,FE,b,'paver');
@@ -5338,25 +5341,121 @@ const WH2={X:-318,FE:-307,FW:-329,AD:2.6,SD:9.6,BD:15,GH:3.54,shops:[]};
   for(const r of[Math.atan2(2*hw,14),-Math.atan2(2*hw,14)])flat(X,c,Math.hypot(14,2*hw),0.12,Y,0.028,r);}
  // ---------- 五華街與仁義街之間的街廓（簡化公寓） ----------
  // ---------- V62：五華街和仁義街之間照 Google 地圖：巷子垂直接兩條街，兩側整齊的透天厝／公寓（不再亂擺） ----------
- const LW=[[FR_Z,-186,-173],[BI_Z,BI_Z-7,BI_Z+7],[FU_Z,FU_Z-6.5,FU_Z+6.5],[FH_Z,FH_Z-6.5,FH_Z+6.5],[4,1.5,6.5],[40,37.5,42.5],[92,89.5,94.5],[134,131.5,136.5],[175,172.5,177.5],[216,213.5,218.5],[-250,-253,-247],[-320,-322.5,-317.5],[-388,-392,-384]];
- const townRows=(xa,xb,lanes,zmin,zmax,xbOf)=>{const L=lanes.map(l=>[l[1],l[2]]).sort((p,q)=>p[0]-q[0]);let z=zmin;const bands=[];for(const[g1,g2]of L){if(g2<=zmin||g1>=zmax)continue;if(g1-z>6)bands.push([z,g1]);z=Math.max(z,g2);}if(zmax-z>6)bands.push([z,zmax]);
+ const LW=[[FR_Z,-186,-173],[BI_Z,BI_Z-7,BI_Z+7],[FU_Z,FU_Z-6.5,FU_Z+6.5],[FH_Z,FH_Z-6.5,FH_Z+6.5],[5.5,1.5,9.5],[40,37.5,42.5],[92,89.5,94.5],[134,131.5,136.5],[175,172.5,177.5],[216,213.5,218.5],[-250,-253,-247],[-320,-322.5,-317.5],[-388,-392,-384]];
+ const townRows=(xa,xb,lanes,zmin,zmax,xbOf,skip)=>{const L=lanes.map(l=>[l[1],l[2]]).sort((p,q)=>p[0]-q[0]);let z=zmin;const bands=[];for(const[g1,g2]of L){if(g2<=zmin||g1>=zmax)continue;if(g1-z>6)bands.push([z,g1]);z=Math.max(z,g2);}if(zmax-z>6)bands.push([z,zmax]);
   for(const[za,zb]of bands){const D=zb-za,n=clamp(Math.round(D/17),1,3),dep=(D-0.8*(n-1))/n;const xe=xbOf?xbOf(za,zb):xb;
    for(let k=0;k<n;k++){const z1=za+k*(dep+0.8),z2=z1+dep,f=n===1?'nzpz':k===0?'nz':k===n-1?'pz':'nzpz';let x=xe,first=true;
-    while(x-xa>3){let w=rr(4.6,6.6);if(x-w-xa<3)w=x-xa;const x1=x-w;let faces=f;if(first)faces+='px';if(x1-xa<0.01)faces+='nx';building(x1,x,z1,z2,faces,{lite:1,floors:pick([4,4,4,5,5,3]),kind:first&&rnd()<0.5?pick(['shop','eatery','motor']):undefined});x=x1;first=false;}}}};
+    while(x-xa>3){let w=rr(4.6,6.6);if(x-w-xa<3)w=x-xa;const x1=x-w;let faces=f;if(first)faces+='px';if(x1-xa<0.01)faces+='nx';if(!(skip&&skip(x1,x,z1,z2)))building(x1,x,z1,z2,faces,{lite:1,floors:pick([4,4,4,5,5,3]),kind:first&&rnd()<0.5?pick(['shop','eatery','motor']):undefined});x=x1;first=false;}}}};
  // 五華街東側建築後方 → 仁義街這邊原本街廓（x=-150）之間；87巷在 x≈-155 轉接仁義街230巷
- townRows(FE+BD+0.4,-150.2,LW,-392,ZMAX-1,(za,zb)=>za>=42&&zb<=90?-157:-150.2);
+ // V63（照 11/27 影片）：仁義街230巷 → 沿五華公園北邊 → 87巷37弄（x≈-183.5）轉到五華街87巷（z 40）；228巷盡頭是公園、對面接五華街75巷
+ const J37=[-186,-181];
+ townRows(FE+BD+0.4,-150.2,LW,-392,ZMAX-1,(za,zb)=>za>=42&&zb<=90?J37[0]-0.2:-150.2,(x1,x2,z1,z2)=>Math.abs(z1-94.5)<0.1&&x2<J37[0]+0.5&&x1>-283);
+ townRows(J37[1]+0.2,-150.2,[],37.5,62.5);
  // 五華街西側店家後方
- townRows(-398,FW-BD-0.4,[[FH_Z,FH_Z-6.5,FH_Z+6.5],[FU_Z,FU_Z-6.5,FU_Z+6.5],[BI_Z,BI_Z-7,BI_Z+7],[24,21.5,26.5],[92,89,95],[134,131.5,136.5],[175,172.5,177.5]],-135,ZMAX-1);
- // 五華公園（地圖綠色那塊：仁義街這邊巷子盡頭、x -150 ~ -76）
- {const x1=-150,x2=-76,z1=94.5,z2=131.5,cx=(x1+x2)/2,cz=(z1+z2)/2;sidewalk(x1,z1,x2,z2,'conc');flat(cx,cz,x2-x1-3,z2-z1-3,grassMat(),0.17);mapRects.push([x1,z1,x2,z2,'#8fc28a']);
-  const PATH=PAINT('#cfc8bc');flat(cx,cz,x2-x1-3,2.2,PATH,0.175);flat(cx,cz,2.2,z2-z1-3,PATH,0.175);flat(cx,cz,Math.hypot(x2-x1,z2-z1)-6,1.6,PATH,0.176,Math.atan2(z2-z1,x2-x1));
-  for(let x=x1+5;x<x2-3;x+=8)for(const z of[z1+3.5,z2-3.5])tree(x+rr(-1,1),z,rr(1.1,1.4),'big');for(const[x,z]of[[x1+12,cz-8],[x2-14,cz+8],[cx-18,cz+7],[cx+16,cz-8]])tree(x,z,1.3,'big');
-  for(const[x,z,ry]of[[cx-6,cz+2.2,0],[cx+6,cz-2.2,Math.PI],[cx-20,cz-2.2,Math.PI],[cx+20,cz+2.2,0]]){const b=new THREE.Group();const sl=new THREE.Mesh(new THREE.BoxGeometry(1.6,0.06,0.45),M('#8a5a32'));sl.position.y=0.45;b.add(sl);const bk=new THREE.Mesh(new THREE.BoxGeometry(1.6,0.4,0.05),M('#8a5a32'));bk.position.set(0,0.72,-0.2);b.add(bk);b.position.set(x,0.17,z);b.rotation.y=ry;S.add(b);addCol(x-0.8,z-0.25,x+0.8,z+0.25);}
-  {const px=x2-12,pz=z1+9;for(const[dx,dz]of[[-2,-2],[2,-2],[-2,2],[2,2]])cyl(px+dx,0.17,pz+dz,0.12,0.12,2.6,M('#7a3a2a'),8);const rf=new THREE.Mesh(new THREE.ConeGeometry(3.6,1.4,4),M('#3a5a4a'));rf.rotation.y=Math.PI/4;rf.position.set(px,3.4,pz);S.add(rf);boxR(px-1.2,px+1.2,pz-0.4,pz+0.4,0.17,0.45,M('#b9b2a4'),{col:1});}
-  for(const[x,z,c]of[[x1+8,z2-10,'#e8b62e'],[x1+11,z2-10,'#2a9d8f'],[x1+14,z2-10,'#e63946']]){cyl(x,0.17,z,0.06,0.06,1.6,M(c),8);boxR(x-0.5,x+0.5,z-0.05,z+0.05,1.5,0.08,M(c),{});}
-  boxR(x1,x2,z1,z1+0.25,0.17,0.5,CURB,{col:0});boxR(x1,x2,z2-0.25,z2,0.17,0.5,CURB,{col:0});boxR(x1,x1+0.25,z1,z2,0.17,0.5,CURB,{col:0});
-  vplane(x2+0.02,1.2,z1+4,2.4,0.6,signMat('五華公園','#2a6a3a','#fff',false,0.2),Math.PI/2);cyl(x2+0.3,0.17,z1+4,0.05,0.05,1.0,M('#555'),6);
-  addLight(cx,3.5,cz,'#ffe8c0',8,'lamp');}
+ townRows(-398,FW-BD-0.4,[[FH_Z,FH_Z-6.5,FH_Z+6.5],[FU_Z,FU_Z-6.5,FU_Z+6.5],[BI_Z,BI_Z-7,BI_Z+7],[24,21.5,26.5],[5,2.5,7.5],[92,89,95],[134,131.5,136.5],[175,172.5,177.5]],-135,ZMAX-1);
+ // ===== V63：五華公園（照 11/27 影片）：仁義街228巷盡頭、87巷南邊、37弄東邊；里民活動中心＋藍色瞭望台、白色涼亭、大榕樹、遊樂場 =====
+ {const x1=J37[1],x2=WH_X-4,z1=67.5,z2=94.5,cx=(x1+x2)/2,cz=81;const PH=0.17;
+  sidewalk(x1,z1,x2,z2,'paver',PH);mapRects.push([x1+2,z1+2,x2-2,z2-2,'#8fc28a']);
+  const STONE=M('#b8ae9c'),STONE2=M('#a39886'),GR=grassMat(),PATHM=PAINT('#d6cfc2');
+  // 低矮石砌花台（裡面是草地＋大樹），中間東西向步道 z 79.5~82.5，南北向步道每段之間
+  const XS=[[x1+2.6,-160],[-157,-136],[-133,-112],[-109,-100]],ZS=[[z1+2.6,79.5],[82.5,z2-2.6]];
+  const BEDS=[];for(const[a,b]of XS)for(const[c,d]of ZS)BEDS.push([a,b,c,d]);
+  for(const[a,b,c,d]of BEDS){if(a<-158&&c>80)continue;/*西南角是遊樂場*/
+   boxR(a,b,c,d,PH,0.42,[STONE,STONE,GR,STONE,STONE,STONE],{tu:2,tv:0.42,cast:false});walkRects.push([a,c,b,d,PH+0.42]);
+   for(let x=a+0.4;x<b-0.6;x+=R(2.4,4))if(rnd()<0.7)blob(x,PH+0.8,c+R(0.6,d-c-0.6),R(0.45,0.8),0.7,LEAFS[R(0,5)|0]);}
+  // 外圈低牆（留入口）：北邊 87巷、東邊入口、西邊 37弄
+  const GAPN=[-150,-122,-98],GAPW=[cz],GAPE=[84];
+  for(let x=x1;x<x2;x+=0.5){if(GAPN.some(g=>Math.abs(x+0.25-g)<1.6))continue;boxR(x,x+0.5,z1,z1+0.3,PH,0.5,STONE2,{cast:false,col:1});}
+  for(let z=z1;z<z2;z+=0.5){if(!GAPW.some(g=>Math.abs(z+0.25-g)<1.6))boxR(x1,x1+0.3,z,z+0.5,PH,0.5,STONE2,{cast:false,col:1});if(!GAPE.some(g=>Math.abs(z+0.25-g)<1.8))boxR(x2-0.3,x2,z,z+0.5,PH,0.5,STONE2,{cast:false,col:1});}
+  // 大榕樹（照片：一排排很大的樹，樹幹分岔）
+  for(const[a,b,c,d]of BEDS){if(a<-158&&c>80)continue;for(let x=a+3;x<b-2;x+=R(7.5,9.5)){tallTree(x,(c+d)/2+R(-1.5,1.5),R(9,12.5),'broad');}}
+  // 中央步道兩側長椅、白色球形路燈
+  const BEN=M('#7a4a2a'),BENL=M('#3a3a3a');const bench=(x,z,ry)=>{const b=new THREE.Group();const sl=new THREE.Mesh(new THREE.BoxGeometry(1.8,0.07,0.5),BEN);sl.position.y=0.45;b.add(sl);const bk=new THREE.Mesh(new THREE.BoxGeometry(1.8,0.42,0.05),BEN);bk.position.set(0,0.74,-0.24);b.add(bk);
+   for(const s of[-0.75,0.75]){const l=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.45,0.5),BENL);l.position.set(s,0.22,0);b.add(l);}b.position.set(x,PH,z);b.rotation.y=ry;S.add(b);addCol(x-0.9,z-0.3,x+0.9,z+0.3);};
+  for(let x=-170;x<-100;x+=9){bench(x,79.1,Math.PI);bench(x+4.5,82.9,0);}
+  const GLOBE=new THREE.MeshLambertMaterial({color:'#f6f4ee',emissive:0x8a8a80});for(let x=-171;x<-80;x+=15){for(const z of[79.0,83.0]){cyl(x,PH,z,0.06,0.08,3.6,M('#d8d8d4'),8);const g=new THREE.Mesh(new THREE.SphereGeometry(0.28,12,9),GLOBE);g.position.set(x,PH+3.85,z);S.add(g);}}
+  addLight(-150,3.6,cz,'#fff2dd',9,'lamp');addLight(-112,3.6,cz,'#fff2dd',9,'lamp');
+  // 白色八角涼亭（步道南邊）
+  {const gx=-122.5,gz=88.5,Rg=2.6;const WH=M('#f2f0ea'),WH2m=M('#dcdad4');for(let i=0;i<8;i++){const a=i/8*Math.PI*2;cyl(gx+Math.cos(a)*Rg,PH,gz+Math.sin(a)*Rg,0.09,0.09,2.7,WH,8);addCol(gx+Math.cos(a)*Rg-0.12,gz+Math.sin(a)*Rg-0.12,gx+Math.cos(a)*Rg+0.12,gz+Math.sin(a)*Rg+0.12);
+    if(i!==2){const b=a+Math.PI/8;const lw=new THREE.Mesh(new THREE.BoxGeometry(0.05,0.8,2*Rg*Math.sin(Math.PI/8)),WH2m);lw.position.set(gx+Math.cos(b)*Rg*0.93,PH+0.45,gz+Math.sin(b)*Rg*0.93);lw.rotation.y=-b;S.add(lw);}}
+   const rf=new THREE.Mesh(new THREE.ConeGeometry(Rg*1.35,1.5,8),WH);rf.position.set(gx,PH+2.7+0.75,gz);rf.rotation.y=Math.PI/8;rf.castShadow=true;S.add(rf);const ring=new THREE.Mesh(new THREE.CylinderGeometry(Rg*1.12,Rg*1.12,0.22,8),WH2m);ring.position.set(gx,PH+2.72,gz);ring.rotation.y=Math.PI/8;S.add(ring);
+   const tip=new THREE.Mesh(new THREE.SphereGeometry(0.16,8,6),WH);tip.position.set(gx,PH+4.3,gz);S.add(tip);boxR(gx-0.7,gx+0.7,gz-0.5,gz+0.5,PH,0.72,M('#b9b2a4'),{col:1});flat(gx,gz,Rg*2.2,Rg*2.2,PAINT('#c9c2b6'),PH+0.005);}
+  // 西南角遊樂場（紅、黃、藍）＋ 北邊健身器材
+  {const px=-169,pz=88;flat(px,pz,19,10,PAINT('#c8503a'),PH+0.006);flat(px,pz,15,7,PAINT('#2f8a5a'),PH+0.008);
+   const RED=M('#d8402a'),YEL=M('#f2c12e'),BLU=M('#2a6ab8'),GRY=M('#bfc3c7');for(const[dx,dz]of[[-1,-1],[1,-1],[-1,1],[1,1]])cyl(px+dx*1.1,PH,pz+dz*1.1,0.08,0.08,2.6,YEL,8);
+   boxR(px-1.3,px+1.3,pz-1.3,pz+1.3,PH+1.4,0.12,BLU,{col:1});const rf=new THREE.Mesh(new THREE.ConeGeometry(1.9,1.1,4),RED);rf.rotation.y=Math.PI/4;rf.position.set(px,PH+3.2,pz);S.add(rf);
+   const sl=new THREE.Mesh(new THREE.BoxGeometry(0.9,0.08,3.4),RED);sl.position.set(px+2.6,PH+0.85,pz);sl.rotation.x=0;sl.rotation.z=0;sl.rotation.y=Math.PI/2;sl.rotateX(0.45);S.add(sl);
+   for(const s of[-1,1])boxR(px-1.2,px+1.2,pz+s*1.3-0.05,pz+s*1.3+0.05,PH+1.5,0.7,GRY,{cast:false});
+   const sx=px-6;for(const dz of[-1.6,1.6]){const l=new THREE.Mesh(new THREE.BoxGeometry(0.1,2.6,0.1),BLU);l.position.set(sx,PH+1.3,pz+dz);S.add(l);}boxR(sx-0.08,sx+0.08,pz-1.7,pz+1.7,PH+2.5,0.12,BLU,{});
+   for(const dz of[-0.7,0.7]){boxR(sx-0.25,sx+0.25,pz+dz-0.12,pz+dz+0.12,PH+0.45,0.06,M('#222'),{});for(const e of[-0.2,0.2])boxR(sx-0.01,sx+0.01,pz+dz+e-0.01,pz+dz+e+0.01,PH+0.5,2.0,GRY,{cast:false});}addCol(sx-0.3,pz-1.8,sx+0.3,pz+1.8);addCol(px-1.3,pz-1.3,px+1.3,pz+1.3);
+   for(const[x,c]of[[-145,'#e8b62e'],[-141,'#2a9d8f'],[-137,'#e8b62e']]){cyl(x,PH,73.6,0.07,0.07,1.7,M(c),8);boxR(x-0.6,x+0.6,73.55,73.65,1.5,0.08,M(c),{});boxR(x-0.4,x+0.4,73.2,74,PH+0.5,0.06,M('#555'),{});}}
+  // 東邊入口：U 形不鏽鋼車阻、禁止進入標誌、黃黑電線桿、變電箱
+  {const ex=x2-1.0;const SS=M('#c9ccd0');for(const z of[82.6,84,85.4]){for(const dz of[-0.32,0.32])cyl(ex,PH,z+dz,0.04,0.04,0.75,SS,8);boxR(ex-0.04,ex+0.04,z-0.36,z+0.36,PH+0.72,0.06,SS,{});}
+   const NO=tex(64,64,(g,W,H)=>{g.clearRect(0,0,W,H);g.fillStyle='#d8262a';g.beginPath();g.arc(32,32,30,0,7);g.fill();g.fillStyle='#fff';g.fillRect(12,27,40,10);},false);const NOM=new THREE.MeshLambertMaterial({map:NO,transparent:true,side:THREE.DoubleSide});
+   for(const z of[81.6,86.4]){cyl(x2-0.6,PH,z,0.035,0.035,2.2,M('#9a9ea2'),6);vplane(x2-0.55,PH+2.0,z,0.6,0.6,NOM,Math.PI/2);}
+   const ST=new THREE.MeshLambertMaterial({map:tex(32,128,(g,W,H)=>{for(let y=-W;y<H;y+=16){g.fillStyle=(Math.floor(y/16)%2)?'#111':'#f2c12e';g.beginPath();g.moveTo(0,y);g.lineTo(W,y+W/2);g.lineTo(W,y+W/2+16);g.lineTo(0,y+16);g.fill();}},false)});
+   for(const z of[80.4,87.6]){cyl(x2+0.6,0,z,0.17,0.19,2.2,ST,10);cyl(x2+0.6,2.2,z,0.14,0.17,7.8,M('#8a8f94'),8);addCol(x2+0.42,z-0.2,x2+0.78,z+0.2);}
+   boxR(x2-2.6,x2-1.4,70,71.6,PH,1.4,M('#b4b8b8'),{col:1});boxR(x2-2.4,x2-1.6,72.6,73.6,PH,1.1,M('#2f7a4a'),{col:1});}
+  // 里民活動中心（灰色兩層、斜屋頂、旁邊廁所）
+  {const ax1=-100.5,ax2=x2-3.2,az1=87.2,az2=z2-0.5;const GW=M('#8d9092'),GW2=M('#6e7275'),GL=new THREE.MeshLambertMaterial({color:'#3a4a55',emissive:0x0a1218});
+   boxR(ax1,ax2,az1,az2,PH,6.6,[GW,GW,M('#55595d'),MAT_CEIL,GW,GW],{col:1,map:'#8d9092'});for(const y of[1.2,4.3])for(const s of[az1-0.02,az2+0.02]){boxR(ax1+1.2,ax2-1.2,s-0.02,s+0.02,PH+y,1.4,GL,{cast:false});}
+   for(let x=ax1+2;x<ax2-1;x+=3.2)boxR(x,x+0.12,az1-0.08,az1,PH,6.6,GW2,{cast:false});
+   const rf=new THREE.Mesh(new THREE.BoxGeometry(ax2-ax1+1.2,0.18,az2-az1+1.6),M('#4a4f55'));rf.position.set((ax1+ax2)/2,PH+7.0,(az1+az2)/2-0.3);rf.rotation.x=-0.1;rf.castShadow=true;S.add(rf);
+   for(const x of[ax1-0.6,ax2+0.6])cyl(x,PH,az1-1.2,0.08,0.08,7.0,GW2,8);
+   vplane((ax1+ax2)/2,PH+3.2,az1-0.12,6,0.7,signMat('五華里 里民活動中心','#f4f2ee','#2a5a3a',false,0.2),Math.PI);
+   const WC=tex(128,64,(g,W,H)=>{g.fillStyle='#1f5fa8';g.fillRect(0,0,W,H);SH_TXT(g,'🚻 公廁',W/2,H/2,30,'#fff');},false);vplane(ax2+0.02,2.6,az1+2,1.4,0.7,new THREE.MeshLambertMaterial({map:WC}),Math.PI/2);}
+  // 藍色瞭望台（高柱＋平台＋欄杆＋上面的小箱）
+  {const tx=x2-5.2,tz=76.5,BL=M('#4a88b8'),BL2=M('#3a6f98');cyl(tx,PH,tz,0.22,0.26,5.8,BL,10);addCol(tx-0.3,tz-0.3,tx+0.3,tz+0.3);
+   for(const a of[0.6,2.2,3.8,5.4])limb(tx,PH+4.2,tz,tx+Math.cos(a)*1.2,PH+5.7,tz+Math.sin(a)*1.2,0.06,0.06,BL2);
+   boxR(tx-1.6,tx+1.6,tz-1.6,tz+1.6,PH+5.8,0.14,BL,{});for(const[a,b,c,d]of[[-1.6,1.6,-1.6,-1.52],[-1.6,1.6,1.52,1.6],[-1.6,-1.52,-1.6,1.6],[1.52,1.6,-1.6,1.6]]){boxR(tx+a,tx+b,tz+c,tz+d,PH+6.5,0.07,BL2,{cast:false});boxR(tx+a,tx+b,tz+c,tz+d,PH+6.1,0.05,BL2,{cast:false});}
+   for(const dx of[-1.55,1.55])for(const dz of[-1.55,1.55])boxR(tx+dx-0.04,tx+dx+0.04,tz+dz-0.04,tz+dz+0.04,PH+5.9,0.65,BL2,{cast:false});boxR(tx-0.9,tx+0.9,tz-0.7,tz+0.7,PH+5.94,1.0,M('#e9ecee'),{});}
+  // 公園牌子
+  {const sx=x2-2.2,sz=z1+1.4;boxR(sx-1.6,sx+1.6,sz-0.3,sz+0.3,PH,0.9,M('#9a8e7a'),{col:1});vplane(sx,PH+0.55,sz-0.31,2.8,0.6,signMat('五華公園','#9a8e7a','#fff',false,0.2),Math.PI);}
+  // 沿 87巷（公園北側）機車格＋停滿機車
+  for(let x=x1+1;x<x2-4;x+=1.1){if(GAPN.some(g=>Math.abs(x-g)<2.2))continue;flat(x,66.0,0.06,2.0,P_WHITE,0.026);if(rnd()<0.8)decorScooter(x+0.55,66.0,rnd()<0.5?0:Math.PI);}
+  lineX(65.0,x1+1,x2-4,0.1,P_WHITE);
+  // 公園裡散步的人
+  for(let i=0;i<5;i++)addPed([x1+4,cz,x2-4,cz]);for(let i=0;i<2;i++)addPed([-150,z1+1.4,-150,z2-1.4]);
+ }
+ // ===== 87巷37弄（公園西邊的南北向小巷）＋ 75巷綠色鐵皮圍牆 =====
+ {const xm=(J37[0]+J37[1])/2;flat(xm,92,5,5,PAINT('#f2c12e'),0.028);for(let k=-2;k<=2;k++){flat(xm+k,92,0.1,5,P_YEL,0.03);flat(xm,92+k,5,0.1,P_YEL,0.03);}
+  // 反光鏡
+  for(const[x,z,ry]of[[J37[1]+0.4,61.6,Math.PI*0.75],[J37[0]-0.4,43.2,-Math.PI*0.25]]){cyl(x,0,z,0.05,0.05,2.6,M('#e8731e'),8);const mr=new THREE.Mesh(new THREE.CircleGeometry(0.42,20),new THREE.MeshLambertMaterial({color:'#cfd8e0',emissive:0x334050,side:THREE.DoubleSide}));mr.position.set(x,2.75,z);mr.rotation.y=ry;S.add(mr);const rim=new THREE.Mesh(new THREE.TorusGeometry(0.43,0.04,6,20),M('#e8731e'));rim.position.copy(mr.position);rim.rotation.y=ry;S.add(rim);}
+  streetPlate(J37[1]+0.5,38.6,'五華街87巷37弄','#1f4f8a',0);parked(makeCar('#f0f0ee'),J37[0]+1.2,74,0);
+  for(let z=44;z<88;z+=0.95)if(rnd()<0.55&&!(z>70&&z<79))decorScooter(J37[0]+0.8,z,Math.PI/2);
+  // 75巷南側：綠色鐵皮圍牆（後面是鐵皮屋）
+  const FX1=-282,FX2=J37[0]-0.6,FZ=94.7;const CORR=tex(64,128,(g,W,H)=>{g.fillStyle='#6f9a86';g.fillRect(0,0,W,H);for(let x=0;x<W;x+=8){g.fillStyle='#87b29d';g.fillRect(x,0,3,H);g.fillStyle='#557d6a';g.fillRect(x+5,0,2,H);}g.fillStyle='rgba(120,80,40,0.25)';g.fillRect(0,H-18,W,18);});
+  const CM=new THREE.MeshLambertMaterial({map:CORR});CM.map.repeat.set((FX2-FX1)/1.2,1);boxR(FX1,FX2,FZ,FZ+0.12,0,2.5,[CM,CM,M('#557d6a'),CM,CM,CM],{col:1,cast:false});
+  for(let x=FX1;x<FX2;x+=3)boxR(x,x+0.08,FZ+0.12,FZ+0.2,0,2.55,M('#4a6a5a'),{cast:false});
+  const RUST=M('#8a6a4a'),RUST2=M('#a9a397');for(let x=FX1+1;x<FX2-4;){const w=R(7,14),d=R(6,12);boxR(x,Math.min(x+w,FX2-1),FZ+1,FZ+1+d,0,R(2.8,3.6),[RUST2,RUST2,RUST,MAT_CEIL,RUST2,RUST2],{col:1,map:'#9a8a78'});x+=w+R(1,3);}
+  for(const x of[-196,-212,-229,-247,-266])if(rnd()<0.85)parked(makeCar(pick(CAR_COLS)),x,93.2,rnd()<0.5?Math.PI/2:-Math.PI/2);
+  for(let x=-276;x<-188;x+=0.9)if(rnd()<0.3)decorScooter(x,90.4,0);
+  // 75巷口（五華街）：鵝肉飯招牌、游師傅立牌
+  vplane(-286,3.3,89.38,4.2,0.9,signMat('鵝肉飯・羊肉麵','#c8302a','#fff',false,0.2),Math.PI);
+  {const sx=FE+BD+1.5,sz=90.3;boxR(sx-0.04,sx+0.04,sz-0.5,sz+0.5,0,1.4,M('#888'),{});vplane(sx+0.06,1.0,sz,0.9,1.3,signMat('游師傅','#1f5fa8','#fff',true,0.2),Math.PI/2);}
+ }
+ // ===== V63：五華街93巷（照影片：路寬約 8m、黃色中線、兩邊停滿機車、汽車、鐵皮雨遮、電線桿） =====
+ {const Z0=1.5,Z1=9.5,ZC=5.5,XA=FE+BD+0.4,XB=-30;
+  lineX(ZC-0.12,XA+2,XB-1,0.1,P_YEL);lineX(ZC+0.12,XA+2,XB-1,0.1,P_YEL);lineX(Z0+1.9,XA+1,XB,0.1,P_WHITE);lineX(Z1-1.9,XA+1,XB,0.1,P_WHITE);
+  const AWN=['#2f7a4a','#b0453a','#4a6a8a','#9aa0a6','#2f7a4a','#c8a03a'].map(c=>M(c));
+  for(const[zf,dir]of[[Z0,1],[Z1,-1]]){for(let x=XB;x>XA+2;){const w=R(4.5,7);if(rnd()<0.7){const m=pick(AWN);boxR(x-w+0.2,x-0.2,dir>0?zf:zf-1.3,dir>0?zf+1.3:zf,2.7,0.06,m,{cast:false,rx:dir*0.18});}
+    if(rnd()<0.35)boxR(x-w*0.6,x-w*0.6+0.8,dir>0?zf:zf-0.45,dir>0?zf+0.45:zf,3.6,0.55,MAT_AC,{cast:false});x-=w;}}
+  for(let x=XB-1;x>XA+2;){const car=rnd()<0.16;if(car){parked(makeCar(pick(CAR_COLS)),x-2.3,Z0+1.05+0.4,rnd()<0.5?Math.PI/2:-Math.PI/2);x-=6;continue;}if(rnd()<0.72)decorScooter(x,Z0+0.95,Math.PI);x-=0.86;}
+  for(let x=XB-1;x>XA+2;x-=0.86){if(rnd()<0.62)decorScooter(x,Z1-0.95,0);}
+  for(let x=XB-12;x>XA+6;x-=R(26,34)){cyl(x,0,Z1-0.25,0.16,0.2,8.6,M('#8a8f94'),8);addCol(x-0.2,Z1-0.45,x+0.2,Z1-0.05);boxR(x-0.6,x+0.6,Z1-0.35,Z1-0.15,7.8,0.1,M('#555'),{cast:false});}
+  for(const dy of[7.6,7.9,8.2])boxR(XA+6,XB-12,Z1-0.27+dy*0.01-0.08,Z1-0.24+dy*0.01-0.08,dy,0.025,M('#1d1d1d'),{cast:false});
+  for(const z of[Z0,Z1])for(let x=XB-20;x>XA;x-=R(28,40))wallLamp(x,z,0,z<ZC?1:-1);
+  streetPlate(XA+1.2,Z0+0.4,'五華街93巷','#1f4f8a',0);}
+ // ===== 93巷口對面：天祐宮牌樓（五華街西側小巷）＋ 巷口攤車 =====
+ {const ax=FW-2.6,za=2.6,zb=7.4,RD=M('#b8322a'),GD=M('#d9a83a');for(const z of[za,zb]){cyl(ax,0,z,0.13,0.15,5.4,RD,10);addCol(ax-0.18,z-0.18,ax+0.18,z+0.18);}
+  const AT=tex(512,128,(g,W,H)=>{g.clearRect(0,0,W,H);g.strokeStyle='#d9a83a';g.lineWidth=10;g.beginPath();g.moveTo(10,120);g.quadraticCurveTo(W/2,-30,W-10,120);g.stroke();
+   for(const[i,ch]of[[0,'宮'],[1,'祐'],[2,'天']]){const x=W/2+(i-1)*110;g.fillStyle='#c8302a';g.beginPath();g.arc(x,74,40,0,7);g.fill();g.strokeStyle='#f2d070';g.lineWidth=4;g.stroke();SH_TXT(g,ch,x,76,46,'#fff');}},false);
+  const AM=new THREE.MeshLambertMaterial({map:AT,transparent:true,side:THREE.DoubleSide});vplane(ax,5.0,(za+zb)/2,6.4,1.6,AM,Math.PI/2);boxR(ax-0.06,ax+0.06,za-0.4,zb+0.4,4.3,0.16,GD,{});
+  const sun=new THREE.Mesh(new THREE.SphereGeometry(0.28,10,8),new THREE.MeshLambertMaterial({color:'#e8b62e',emissive:0x553300}));sun.position.set(ax,6.1,(za+zb)/2);S.add(sun);
+  // 93巷口南側（全正通訊前）攤車
+  const st=tex(256,96,(g,W,H)=>{g.fillStyle='#f2d04a';g.fillRect(0,0,W,H);SH_TXT(g,'當歸鴨・米糕',W/2,34,30,'#c8302a');SH_TXT(g,'豬血湯・四神湯',W/2,72,24,'#1d1d1f');},false);
+  const sx=X+6.2,sz=11.4;boxR(sx-0.5,sx+0.5,sz-0.9,sz+0.9,0.15,0.95,M('#b8bcbf'),{col:1});boxR(sx-0.55,sx+0.55,sz-0.95,sz+0.95,1.1,0.06,M('#9a9ea2'),{});vplane(sx-0.52,1.65,sz,1.8,0.6,new THREE.MeshLambertMaterial({map:st}),-Math.PI/2);
+  for(const dz of[-0.7,0.7])boxR(sx-0.03,sx+0.03,sz+dz-0.03,sz+dz+0.03,1.1,0.9,M('#9a9ea2'),{cast:false});cyl(sx+0.7,0.15,sz-0.4,0.18,0.18,0.6,M('#3a6ab0'),10);}
  // 橫向街道人行道（五華街到原本地圖邊界）
  for(const[c,hw]of[[FH_Z,3.5],[FU_Z,3.5],[BI_Z,4],[FR_Z,4]]){for(const s of[-1,1]){sidewalk(FE,Math.min(c+s*hw,c+s*(hw+3)),-150,Math.max(c+s*hw,c+s*(hw+3)),'walk');if(c!==FR_Z)sidewalk(-392,Math.min(c+s*hw,c+s*(hw+3)),FW,Math.max(c+s*hw,c+s*(hw+3)),'walk');}
   lineX(c-0.13,FE,-150,0.11,P_YEL);lineX(c+0.13,FE,-150,0.11,P_YEL);}
@@ -5508,7 +5607,7 @@ for(const id of['ttStart','ttDesign','ttDay'])document.getElementById(id).disabl
  * Audio starts ONLY after a user click (browser autoplay policy).
  * No licensed tracks or external media files.
  */
-const GAME_META={version:'V62',updated:'2026/11/26',feature:'五華街距離照地圖比例尺／中間街廓整齊＋五華公園／每間店放相關的東西'};
+const GAME_META={version:'V63',updated:'2026/11/27',feature:'五華公園照影片移到228巷盡頭（活動中心、藍色瞭望台、白涼亭、大榕樹、遊樂場）／87巷37弄／75巷鐵皮圍牆／93巷加寬＋黃線＋機車＋雨遮／天祐宮牌樓'};
 window.GAME_META=GAME_META;
 document.getElementById('ttBuildVersion').textContent=GAME_META.version;
 document.getElementById('ttBuildDate').textContent='更新日期｜'+GAME_META.updated;
