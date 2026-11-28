@@ -5464,7 +5464,7 @@ const WH2={X:-318,FE:-307,FW:-329,AD:2.6,SD:9.6,BD:15,GH:3.54,shops:[]};
   // 店後方一樓
   if(!o.ws){if(side>0)boxR(gb+0.3,xb,z1,z2,0,GH,SIDEM,{col:1,block:1});else boxR(xa,ga-0.3,z1,z2,0,GH,SIDEM,{col:1,block:1});}
   // 招牌（騎樓上方）
-  if(o.kind!=='door'&&!o.nosign){const sm=sgn(o);vplane(side>0?xF-0.04:xF+0.04,GH+0.55,zc,w-0.5,1.0,sm,side>0?-Math.PI/2:Math.PI/2);addLight(side>0?xF-1.2:xF+1.2,GH+0.4,zc,'#fff4dd',4,'sign');}
+  if(o.kind!=='door'&&!o.nosign&&!o.ws){const sm=sgn(o);vplane(side>0?xF-0.04:xF+0.04,GH+0.55,zc,w-0.5,1.0,sm,side>0?-Math.PI/2:Math.PI/2);addLight(side>0?xF-1.2:xF+1.2,GH+0.4,zc,'#fff4dd',4,'sign');}
   if(o.v&&Array.isArray(o.v))vsign(side,zc+(side>0?-w*0.3:w*0.3),GH+1.2,Math.min(5.5,0.9+o.v[0].length*0.75),o.v[0],o.v[1],o.v[2]);
   if(o.up){const t=signMat(o.up[0],o.up[1],o.up[2],false,0.4);vplane(side>0?xF-0.05:xF+0.05,GH+3.6,zc,Math.min(w-0.4,o.up[0].length*0.9),0.8,t,side>0?-Math.PI/2:Math.PI/2);}
   if(o.big){const t=tex(64,320,(g,W,Hh)=>{g.fillStyle='rgba(0,0,0,0)';g.clearRect(0,0,W,Hh);for(let i=0;i<o.big.length;i++)SH_TXT(g,o.big[i],W/2,40+i*72,54,'#e8e2d6','900',"serif");},false);vplane(side>0?xF-0.05:xF+0.05,GH+7,z1+1.2,0.9,4.5,new THREE.MeshLambertMaterial({map:t,transparent:true}),side>0?-Math.PI/2:Math.PI/2);}
@@ -5480,6 +5480,13 @@ const WH2={X:-318,FE:-307,FW:-329,AD:2.6,SD:9.6,BD:15,GH:3.54,shops:[]};
      g.font='900 44px sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillStyle=OR;g.fillText('7',W*0.47,30);g.font='900 18px sans-serif';g.fillStyle=GN;g.fillText('-TEN',W*0.525,40);}};
    try{(side>0?WSM:WS)(cfw);}catch(err){console.warn('ws',o.n,err);}
    boxR(side>0?xF+AD-0.6:xF-AD,side>0?xF+AD:xF-AD+0.6,z1,z2,0.15,0.04,PAINT('#e8c23a'),{cast:false});
+   // V66：外觀照仁義街 7-TEN：騎樓上方整條三色招牌、綠色「7／ATM」直立燈箱、精品咖啡直立旗
+   {const SG=tex(1024,64,cfw.sign,false),sm=new THREE.MeshLambertMaterial({map:SG,emissive:0x444444,emissiveMap:SG});nightEmi(sm,0.7);const wm=M('#ffffff'),ms=[wm,wm,M('#e8e8e8'),M('#ccc'),wm,wm];ms[side>0?1:0]=sm;
+    boxR(side>0?xF-0.45:xF,side>0?xF:xF+0.45,z1+0.1,z2-0.1,GH+0.05,1.05,ms,{cast:true});addLight(side>0?xF-1.4:xF+1.4,GH+0.4,zc,'#ffffff',5,'sign');
+    const t=tex(128,256,(g,W,Hh)=>{g.fillStyle='#fff';g.fillRect(0,0,W,Hh);g.fillStyle=GN;g.fillRect(0,0,W,Hh*0.42);g.font='900 80px sans-serif';g.textAlign='center';g.fillStyle=OR;g.fillText('7',W/2,90);g.fillStyle='#1f4fa8';g.fillRect(0,Hh*0.45,W,Hh*0.55);g.fillStyle='#fff';g.font='900 22px sans-serif';g.fillText('ATM',W/2,Hh*0.62);g.fillText('☕  🍴',W/2,Hh*0.85);},false);
+    const m=new THREE.MeshLambertMaterial({map:t,emissive:0x333333,emissiveMap:t});const vz=side>0?z2-0.55:z1+0.55;boxR(side>0?xF-0.75:xF+0.05,side>0?xF-0.05:xF+0.75,vz-0.2,vz+0.2,GH+1.4,2.8,[m,m,M('#fff'),M('#fff'),m,m],{cast:false});addLight(side>0?xF-1.3:xF+1.3,GH+2.6,vz,'#ffffff',4,'sign');
+    const b=signMat('精品咖啡','#1d3a6e','#e8d6a8',true,0.4),px=side>0?xF-1.0:xF+1.0,pz=side>0?z1+1.2:z2-1.2;cyl(px,0.15,pz,0.03,0.03,2.6,M('#ccc'),5);vplane(px,1.6,pz+0.3,0.6,2,b,Math.PI/2);vplane(px,1.6,pz+0.3,0.6,2,b,-Math.PI/2);
+    boxR(side>0?xF-1.6:xF+1.0,side>0?xF-1.0:xF+1.6,z1,z2,0.15,0.04,PAINT('#e8c23a'),{cast:false});}
    WH2.shops.push({n:o.n,x:side>0?FE+AD:FW-AD,z:zc,side});return;}
   if(o.kind==='door'){const dm=tex(128,128,(g,W,Hh)=>{g.fillStyle='#6a6660';g.fillRect(0,0,W,Hh);g.fillStyle='#2a3a3a';g.fillRect(W*0.25,Hh*0.15,W*0.5,Hh*0.85);g.strokeStyle='#c9c4b8';g.lineWidth=3;for(let x=W*0.25;x<W*0.75;x+=8){g.beginPath();g.moveTo(x,Hh*0.15);g.lineTo(x,Hh);g.stroke();}g.fillStyle='#e8e2d6';g.fillRect(W*0.3,Hh*0.04,W*0.4,Hh*0.08);},false);
    boxR(ga,gb,z1+0.2,z2-0.2,0,GH,[SIDEM,SIDEM,SIDEM,SIDEM,SIDEM,SIDEM],{col:1,block:1});vplane(side>0?ga-0.02:gb+0.02,GH/2,zc,w-0.4,GH,new THREE.MeshLambertMaterial({map:dm}),side>0?-Math.PI/2:Math.PI/2);
@@ -5869,7 +5876,7 @@ for(const id of['ttStart','ttDesign','ttDay'])document.getElementById(id).disabl
  * Audio starts ONLY after a user click (browser autoplay policy).
  * No licensed tracks or external media files.
  */
-const GAME_META={version:'V65',updated:'2026/11/28',feature:'五華街兩間 7-TEN（重華、五華門市）改成跟仁義街那間一樣：冷藏飲料牆、貨架、櫃檯、咖啡機、ATM、ibox、霜淇淋機、窗邊座位、自動門'};
+const GAME_META={version:'V66',updated:'2026/11/28',feature:'五華街兩間 7-TEN 外觀照仁義街那間：三色招牌、綠色 7／ATM 直立燈箱、精品咖啡直立旗、黃色路緣'};
 window.GAME_META=GAME_META;
 document.getElementById('ttBuildVersion').textContent=GAME_META.version;
 document.getElementById('ttBuildDate').textContent='更新日期｜'+GAME_META.updated;
