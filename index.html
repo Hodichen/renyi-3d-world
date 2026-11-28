@@ -4672,7 +4672,7 @@ function WS(cf){const{x1,x2,z1,z2,th}=cf,H=3.4,X=a=>x2-a,Z=b=>z1+b,W=z2-z1;INDOO
  boxR(x1+2,x1+2.7,z2-0.7,z2,0.16,1.45,[IE('#f2f2ef'),IE('#f2f2ef'),IE('#f2f2ef'),IE('#f2f2ef'),IE('#f2f2ef'),IT(kp,0.5)],{col:1,cast:false});
  boxR(x1+3.8,x1+4.5,z2-0.7,z2,0.16,1.4,IE('#f4f4f4'),{col:1,cast:false});{const t=tex(64,64,(g,Wd,Hh)=>{g.fillStyle='#ffd6e0';g.fillRect(0,0,Wd,Hh);txt(g,'霜淇淋',Wd/2,Hh/2,14,'#c2185b');},false);vplane(x1+4.15,1.2,z2-0.71,0.6,0.5,IT(t,0.5),Math.PI);}
  // 外招牌
- const SG=tex(1024,64,cf.sign,false);boxR(x2-0.1,x2+0.35,z1-0.3,z2+0.3,3.0,0.85,[IT(SG,0.7),IE('#fff'),IE('#e8e8e8'),IE('#ccc'),IE('#fff'),IE('#fff')],{cast:true});
+ const SG=tex(1024,64,cf.sign,false);boxR(x2-0.1,x2+0.35,z1-0.3,z2+0.3,cf.signY||3.0,cf.signH||0.85,[IT(SG,0.7),IE('#fff'),IE('#e8e8e8'),IE('#ccc'),IE('#fff'),IE('#fff')],{cast:true});
  // 互動
  addInteract(X(4.2),Z(3.4),1.6,`${th.short} 櫃檯（買東西）`,()=>openShop(cf.st||STORES[cf.store]));
  for(const[x,z,lab,n,p]of[[x1+1.4,(z1+z2)/2,...cf.picks[0]],[X(8),Z(6.5),...cf.picks[1]],[X(8),Z(9.9),...cf.picks[2]]])addInteract(x,z,1.4,`拿 ${lab} NT$${p}`,()=>buy(n,p,'item'));
@@ -5473,7 +5473,7 @@ const WH2={X:-318,FE:-307,FW:-329,AD:2.6,SD:9.6,BD:15,GH:3.54,shops:[]};
   if(o.d64&&D64[o.d64])D64[o.d64](o);
   // V65：7-TEN 跟仁義街那間一樣（WS：冷藏飲料牆、貨架、櫃檯、咖啡機、ATM、ibox、霜淇淋機、窗邊座位、自動門）
   if(o.ws){const D=12.2,OR='#f58220',GN='#008061',RD='#e5202e';const x1=side>0?xF+AD:xF-AD-D,x2=side>0?xF+AD+D:xF-AD,W0=z2-z1-0.4,dm=W0/2;
-   const cfw={x1,x2,z1:z1+0.2,z2:z2-0.2,xb:x1,door:[dm-1,dm+1],store:1,seed:RI(1,20),tile:'#d8cfb8',th:{c1:GN,c2:OR,uni:'#cfd3d6',short:'7-TEN',fridge:'冰涼飲料  COLD DRINKS',cafe:['城市精品','CITY PRIMO','#1d2a4a'],kiosk:'ibox',stool:'#e5202e'},
+   const cfw={x1,x2,z1:z1+0.2,z2:z2-0.2,xb:x1,signY:2.72,signH:0.78,door:[dm-1,dm+1],store:1,seed:RI(1,20),tile:'#d8cfb8',th:{c1:GN,c2:OR,uni:'#cfd3d6',short:'7-TEN',fridge:'冰涼飲料  COLD DRINKS',cafe:['城市精品','CITY PRIMO','#1d2a4a'],kiosk:'ibox',stool:'#e5202e'},
     posters:[[1.6,2.1,1.6,0.8,'#1d3a6e','精品咖啡','為咖啡極致而生'],[3.6,2.1,1.6,0.8,'#f2efe6','花香耶加雪菲','探索莊園新滋味','#3a4a6a'],[Math.min(9.9,W0-1.2),1.4,1.0,1.0,'#e5202e','集點換好禮','7-TEN 好鄰居']],
     picks:[['冰紅茶','冰紅茶',25],['御飯糰','鮭魚飯糰',35],['牛奶糖','牛奶糖',20]],
     sign:(g,W,Hh)=>{g.fillStyle='#fff';g.fillRect(0,0,W,Hh);for(const[y,c]of[[12,OR],[28,GN],[44,RD]]){g.fillStyle=c;g.fillRect(0,y,W*0.44,9);g.fillRect(W*0.56,y,W*0.44,9);}
@@ -5482,7 +5482,7 @@ const WH2={X:-318,FE:-307,FW:-329,AD:2.6,SD:9.6,BD:15,GH:3.54,shops:[]};
    boxR(side>0?xF+AD-0.6:xF-AD,side>0?xF+AD:xF-AD+0.6,z1,z2,0.15,0.04,PAINT('#e8c23a'),{cast:false});
    // V66：外觀照仁義街 7-TEN：騎樓上方整條三色招牌、綠色「7／ATM」直立燈箱、精品咖啡直立旗
    {const SG=tex(1024,64,cfw.sign,false),sm=new THREE.MeshLambertMaterial({map:SG,emissive:0x444444,emissiveMap:SG});nightEmi(sm,0.7);const wm=M('#ffffff'),ms=[wm,wm,M('#e8e8e8'),M('#ccc'),wm,wm];ms[side>0?1:0]=sm;
-    boxR(side>0?xF-0.45:xF,side>0?xF:xF+0.45,z1+0.1,z2-0.1,GH+0.05,1.05,ms,{cast:true});addLight(side>0?xF-1.4:xF+1.4,GH+0.4,zc,'#ffffff',5,'sign');
+    /*V67：只留店面那條招牌*/addLight(side>0?xF-1.4:xF+1.4,GH+0.4,zc,'#ffffff',5,'sign');
     const t=tex(128,256,(g,W,Hh)=>{g.fillStyle='#fff';g.fillRect(0,0,W,Hh);g.fillStyle=GN;g.fillRect(0,0,W,Hh*0.42);g.font='900 80px sans-serif';g.textAlign='center';g.fillStyle=OR;g.fillText('7',W/2,90);g.fillStyle='#1f4fa8';g.fillRect(0,Hh*0.45,W,Hh*0.55);g.fillStyle='#fff';g.font='900 22px sans-serif';g.fillText('ATM',W/2,Hh*0.62);g.fillText('☕  🍴',W/2,Hh*0.85);},false);
     const m=new THREE.MeshLambertMaterial({map:t,emissive:0x333333,emissiveMap:t});const vz=side>0?z2-0.55:z1+0.55;boxR(side>0?xF-0.75:xF+0.05,side>0?xF-0.05:xF+0.75,vz-0.2,vz+0.2,GH+1.4,2.8,[m,m,M('#fff'),M('#fff'),m,m],{cast:false});addLight(side>0?xF-1.3:xF+1.3,GH+2.6,vz,'#ffffff',4,'sign');
     const b=signMat('精品咖啡','#1d3a6e','#e8d6a8',true,0.4),px=side>0?xF-1.0:xF+1.0,pz=side>0?z1+1.2:z2-1.2;cyl(px,0.15,pz,0.03,0.03,2.6,M('#ccc'),5);vplane(px,1.6,pz+0.3,0.6,2,b,Math.PI/2);vplane(px,1.6,pz+0.3,0.6,2,b,-Math.PI/2);
@@ -5876,7 +5876,7 @@ for(const id of['ttStart','ttDesign','ttDay'])document.getElementById(id).disabl
  * Audio starts ONLY after a user click (browser autoplay policy).
  * No licensed tracks or external media files.
  */
-const GAME_META={version:'V66',updated:'2026/11/28',feature:'五華街兩間 7-TEN 外觀照仁義街那間：三色招牌、綠色 7／ATM 直立燈箱、精品咖啡直立旗、黃色路緣'};
+const GAME_META={version:'V67',updated:'2026/11/28',feature:'五華街 7-TEN 只留店面一條三色招牌（拿掉騎樓上方那條）'};
 window.GAME_META=GAME_META;
 document.getElementById('ttBuildVersion').textContent=GAME_META.version;
 document.getElementById('ttBuildDate').textContent='更新日期｜'+GAME_META.updated;
