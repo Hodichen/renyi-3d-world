@@ -3452,7 +3452,7 @@ function rigPlay(R,name,fade){if(R.curName===name)return;const a=R.acts[name]||(
  if(R.cur&&R.cur!==a){if(fade)R.cur.fadeOut(fade);else R.cur.stop();}R.cur=a;R.curName=name;}
 const _rv=new THREE.Vector3(),_rd=new THREE.Vector3(),_ry=new THREE.Vector3(0,1,0),_rq=new THREE.Quaternion(),_rx=new THREE.Vector3(1,0,0);
 const DLIGHT=new THREE.PointLight('#fff1dc',0,9,1.6);scene.add(DLIGHT);
-function rigTick(dt){if(typeof npcRigUpdate==='function'){npcRigUpdate(dt,camera.position);allRigTick(dt);}if(typeof autoDoorTick==='function')autoDoorTick(dt);if(typeof carRigUpdate==='function')carRigUpdate(dt,camera.position);const c=player,R=c&&c.rig;DLIGHT.intensity=DESIGN?1.6:0;if(DESIGN){DLIGHT.position.set(camera.position.x*0.6+PL.pos.x*0.4,PL.pos.y+2.2,camera.position.z*0.6+PL.pos.z*0.4);}if(!R)return;if(R.m.parent!==c.g){c.rig=null;return;}
+function rigTick(dt){if(typeof npcRigUpdate==='function'){npcRigUpdate(dt,camera.position);allRigTick(dt);}try{bubbleTick(dt);}catch(e){}if(typeof autoDoorTick==='function')autoDoorTick(dt);if(typeof carRigUpdate==='function')carRigUpdate(dt,camera.position);const c=player,R=c&&c.rig;DLIGHT.intensity=DESIGN?1.6:0;if(DESIGN){DLIGHT.position.set(camera.position.x*0.6+PL.pos.x*0.4,PL.pos.y+2.2,camera.position.z*0.6+PL.pos.z*0.4);}if(!R)return;if(R.m.parent!==c.g){c.rig=null;return;}
  const lie=!!(PL.sit&&PL.sit.lie);R.m.visible=!lie;c.rt.visible=lie;
  const umb=!!(c.umb&&c.umb.visible)&&!PL.sit&&!PL.veh;let want='idle',ts=1;const sp=PL.vel?Math.hypot(PL.vel.x,PL.vel.z):0;
  const C=R.K.clips;if(PL.sit)want=C.sitIdle?'sitIdle':'rest';else if(PL.veh)want=C.drive?'drive':'ride';else if(PL.onGround===false&&C.jumpL&&Math.abs(PL.vy||0)>1.2)want='jumpL';else if(sp>0.35){if(umb){want='umbwalk';ts=Math.min(2.2,Math.max(.7,sp/1.3));}else if(sp>6.2&&C.sprint){want='sprint';ts=Math.max(.8,Math.min(1.5,sp/6.6));}else if(sp>3.6&&C.jog){want='jog';ts=Math.max(.8,Math.min(1.6,sp/3.8));}else{want='walk';ts=Math.min(2.1,Math.max(.7,sp/1.45));}}else want=umb?'umbhold':'idle';
@@ -3461,6 +3461,27 @@ function rigTick(dt){if(typeof npcRigUpdate==='function'){npcRigUpdate(dt,camera
  R.U.visible=umb;if(umb&&R.RH){c.g.updateMatrixWorld(true);R.RH.getWorldPosition(_rv);c.g.worldToLocal(_rv);_rd.set(-_rv.x*.5,1.0,-_rv.z*.2).normalize();R.U.quaternion.setFromUnitVectors(_ry,_rd);R.U.position.copy(_rv).addScaledVector(_rd,-.05);}}
 
 // ===== 路人換寫實人物：鏡頭 40 公尺內最近的 14 個路人用真人模型，遠的維持程式人物 =====
+
+// ===== V69：路人會講話（頭上對話框）：鏡頭附近的人輪流冒出對話，每句約 4 秒 =====
+const BUB={pool:[],t:0,N:isTouch?6:8,range:16,
+ lines:['今天好熱喔～','欸你吃飯了沒？','等一下要去補習…','老闆，一份帶走！','這家很好吃耶！','機車停哪裡啊？','好想喝珍奶','明天要考試…','媽媽叫我買醬油','這條街好熱鬧','排隊的人好多喔','手機快沒電了','晚上去夜市嗎？','小心車子喔！','好久不見！最近好嗎？','我在減肥啦…','便當要買兩個','下午好像會下雨','要不要去吃滷味？','先去領個錢','公車怎麼還沒來','這邊停車好難','剛剛那家打折耶','我等一下去接小孩','好累喔，想睡覺','今天天氣不錯','走啦，去買飲料！','你看那隻狗好可愛','我快遲到了！','麥當樂買一送一欸'],
+ kid:['老師好！','下課了耶！','我要玩溜滑梯','今天午餐吃什麼？','作業寫完了嗎？','我們來玩鬼抓人！','媽媽來接我了','我要買文具'],
+ shop:['「%s」今天有特價耶','要不要去「%s」看看？','我剛從「%s」出來','「%s」排好長喔','聽說「%s」很不錯'],
+ mk(){const cv=document.createElement('canvas');cv.width=256;cv.height=112;const t=new THREE.CanvasTexture(cv);const m=new THREE.SpriteMaterial({map:t,depthWrite:false,transparent:true});const s=new THREE.Sprite(m);s.scale.set(2.6,1.14,1);s.renderOrder=999;s.visible=false;scene.add(s);return{s,cv,t,who:null,until:0,h:1.9};},
+ draw(b,txt){const g=b.cv.getContext('2d');g.clearRect(0,0,256,112);const r=(x,y,w,h,q)=>{g.beginPath();g.moveTo(x+q,y);g.lineTo(x+w-q,y);g.quadraticCurveTo(x+w,y,x+w,y+q);g.lineTo(x+w,y+h-q);g.quadraticCurveTo(x+w,y+h,x+w-q,y+h);g.lineTo(x+q,y+h);g.quadraticCurveTo(x,y+h,x,y+h-q);g.lineTo(x,y+q);g.quadraticCurveTo(x,y,x+q,y);g.closePath();};
+  g.fillStyle='rgba(255,255,255,.96)';g.strokeStyle='#2a2a2a';g.lineWidth=4;r(6,6,244,74,20);g.fill();g.stroke();g.beginPath();g.moveTo(112,78);g.lineTo(126,104);g.lineTo(144,78);g.closePath();g.fill();g.stroke();g.fillStyle='rgba(255,255,255,.96)';g.fillRect(110,72,38,9);
+  const sz=Math.min(30,Math.floor(228/Math.max(1,txt.length)*1.05));g.font=`800 ${sz}px ${FONT}`;g.textAlign='center';g.textBaseline='middle';g.fillStyle='#1d1d1f';g.fillText(txt,128,44);b.t.needsUpdate=true;},
+ say(c){const p=c.g.getWorldPosition(new THREE.Vector3());let s=null;
+  if(c._o&&c._o.cls)return pick(this.kid);
+  if(typeof WH2!=='undefined'&&rnd()<0.45){let bd=7;for(const q of WH2.shops){const d=Math.hypot(q.x-p.x,q.z-p.z);if(d<bd&&!/公寓|車道|車庫|號$/.test(q.n)){bd=d;s=q.n;}}}
+  return s?pick(this.shop).replace('%s',s.replace(/\s.*$/,'')):pick(this.lines);}};
+function bubbleTick(dt){if(!scene||!camera)return;if(!BUB.pool.length)for(let i=0;i<BUB.N;i++)BUB.pool.push(BUB.mk());
+ const now=performance.now()/1000;let ref=camera.position;if(player&&player.g&&Math.hypot(player.g.position.x-ref.x,player.g.position.z-ref.z)<30)ref=player.g.position;
+ BUB.t-=dt;if(BUB.t<=0){BUB.t=0.9;const L=window.ALLCH||[];const busy=new Set(BUB.pool.filter(b=>b.who).map(b=>b.who));const cand=[];
+  for(const c of L){if(c===player||busy.has(c)||!chOnStage(c)||c.g.parent!==scene)continue;const d=Math.hypot(c.g.position.x-ref.x,c.g.position.z-ref.z);if(d<BUB.range)cand.push(c);}
+  const free=BUB.pool.find(b=>!b.who);if(free&&cand.length){const c=pick(cand);free.who=c;free.until=now+R(3.2,4.8);const bx=new THREE.Box3().setFromObject(c.g);free.h=Math.min(2.6,Math.max(1.0,bx.max.y-c.g.position.y))+0.55;BUB.draw(free,BUB.say(c));free.s.visible=true;}}
+ for(const b of BUB.pool){if(!b.who)continue;const c=b.who;if(now>b.until||!chOnStage(c)||Math.hypot(c.g.position.x-ref.x,c.g.position.z-ref.z)>BUB.range+4){b.who=null;b.s.visible=false;continue;}
+  b.s.position.set(c.g.position.x,c.g.position.y+b.h,c.g.position.z);}}
 const NPC_RIG={max:18,range:42,t:0};
 const NPC_LOOK={shirt:['#ffffff','#2d3142','#e63946','#3a86ff','#7cb026','#e98fb4','#6a4c93','#f4a261','#2a8d80','#d9d5cc','#ffbe0b','#5c4d3c'],pants:['#2d3142','#3a5a8c','#1d3557','#5c4d3c','#6d6875','#d9d5cc','#2f2f2f'],skin:['#f2c9a8','#e8b48f','#d9a07a','#c48862','#a86b48'],hair:['#1d1712','#1d1712','#3a2a1e','#6b4a32','#8a8a88','#a0703f'],mhair:['M_short','M_crew','M_part']};
 function npcLook(c){const L=NPC_LOOK,o=(c&&c._o)||{};const un=o.uniform==='pe'||o.uniform==='summer'?o.uniform:null;const fem=o.lower==='skirt'||/long|pony|bun/.test(o.style||'');
@@ -5255,7 +5276,7 @@ const WH2={X:-318,FE:-307,FW:-329,AD:2.6,SD:9.6,BD:15,GH:3.54,shops:[]};
  const VENT=FAC64('#85796f','vent'),GRAN=FAC64('#a08a86','granite'),CAGE=FAC64('#c4a596','cage'),CREAM=FAC64('#d6cab0','cream');
  const GRL=TXA(128,128,(g,W,H)=>{g.clearRect(0,0,W,H);g.strokeStyle='#1d1d1f';g.lineWidth=7;g.beginPath();g.moveTo(10,10);g.quadraticCurveTo(W/2,H/2,W-10,H-10);g.moveTo(W-10,10);g.quadraticCurveTo(W/2,H/2,10,H-10);g.stroke();
    g.lineWidth=5;for(const[x,y,r]of[[26,32,12],[100,34,10],[30,98,10],[100,96,12],[64,64,14]]){g.beginPath();g.arc(x,y,r,0,7);g.stroke();g.beginPath();g.arc(x,y,r*0.4,0,7);g.stroke();}g.lineWidth=6;g.strokeRect(3,3,W-6,H-6);});
- const VBOX=(z,y0,len,vt,col,xa=FE-1.25,xb=FE-0.3)=>{const c=M(col);boxR(xa,xb,z-0.1,z+0.1,y0,len,[c,c,c,c,vt,vt],{cast:false});addLight((xa+xb)/2-0.6,y0+len/2,z,'#fff4dd',4,'sign');};
+ const VBOX=(z,y0,len,vt,col,xa=FE-0.95,xb=FE)=>{const c=M(col);boxR(xa,xb,z-0.1,z+0.1,y0,len,[c,c,c,c,vt,vt],{cast:false});addLight((xa+xb)/2-0.6,y0+len/2,z,'#fff4dd',4,'sign');};
  const roofY=o=>GH+((o.fl||5)-1)*3.2;
  const SETBACK=(z1,z2,y,h,fv)=>boxR(FE+5,FE+BD,z1,z2,y,h,[SIDEM,FACS[fv],ROOFM,MAT_CEIL,SIDEM,SIDEM],{tu:6,tv:3.2,block:1,map:MAPC});
  const D64={};
@@ -5309,7 +5330,7 @@ const WH2={X:-318,FE:-307,FW:-329,AD:2.6,SD:9.6,BD:15,GH:3.54,shops:[]};
    ['幼大課後班','小一正音班','數學加強班','國小全科班'].forEach((s,i)=>SH_TXT(g,s,190,44+i*22,17,'#1d3a1a','800'));['兒童美語班','全民英檢班','讀寫作文班','寒暑生活營'].forEach((s,i)=>SH_TXT(g,s,310,44+i*22,17,'#1d3a1a','800'));
    SH_TXT(g,'2857-7878',440,96,26,'#c8302a');SH_TXT(g,'上頂文理補習班',300,160,38,'#fff');},0.35));
   VBOX(z1+0.9,GH+0.2,7.0,TXE(128,768,(g,W,H)=>{g.fillStyle='#f6d21e';g.fillRect(0,0,W,H);g.strokeStyle='#fff';g.lineWidth=6;g.strokeRect(4,4,W-8,H-8);g.fillStyle='#c8302a';g.beginPath();g.arc(W/2,52,28,0,7);g.fill();
-   const a='喬丹美語',b='上頂國中文理';for(let i=0;i<a.length;i++)SH_TXT(g,a[i],W/2,118+i*68,58,'#1d1d1f');for(let i=0;i<b.length;i++)SH_TXT(g,b[i],W/2,408+i*58,50,'#1d1d1f');},0.45),'#f6d21e',FE-1.35,FE-0.3);
+   const a='喬丹美語',b='上頂國中文理';for(let i=0;i<a.length;i++)SH_TXT(g,a[i],W/2,118+i*68,58,'#1d1d1f');for(let i=0;i<b.length;i++)SH_TXT(g,b[i],W/2,408+i*58,50,'#1d1d1f');},0.45),'#f6d21e',FE-1.05,FE);
   for(const zz of[z1+2.2,z2-2.2])FP(zz,GH+2.9,2.4,0.7,M('#2a2422'),0.02);
   SETBACK(z1-1,z2+1,top,26,WHITE);};
  D64.drive=o=>{const zc=(o.z1+o.z2)/2;for(let i=0;i<3;i++){const p=new THREE.Mesh(new THREE.SphereGeometry(0.55,8,6),M(pick(['#3f7a3a','#4f8a3a','#2f6a2a'])));p.position.set(FE+1.0,0.75,o.z1+0.8+i*(o.z2-o.z1-1.6)/2);S.add(p);}
@@ -5361,14 +5382,14 @@ const WH2={X:-318,FE:-307,FW:-329,AD:2.6,SD:9.6,BD:15,GH:3.54,shops:[]};
  // 29 Brunch 早午餐：淡紫色招牌、白色燈箱（小豬）、白牆橘色門框
  D64.br=o=>{const{z1,z2}=o,zc=(z1+z2)/2,w=z2-z1;
   FP(zc,GH+0.55,w-0.3,1.0,TXE(512,96,(g,W,H)=>{g.fillStyle='#dcd0ec';g.fillRect(0,0,W,H);g.font=`italic 900 40px serif`;g.fillStyle='#5a3a8a';g.textAlign='left';g.textBaseline='middle';g.fillText('29 Brunch',20,40);SH_TXT(g,'早午餐',360,40,40,'#5a3a8a');SH_TXT(g,'TEL：2857-5868',W*0.62,80,18,'#5a3a8a','800','sans-serif');},0.5));
-  VBOX(z1+0.3,GH+0.1,1.4,TXE(96,160,(g,W,H)=>{g.fillStyle='#f4f2f6';g.fillRect(0,0,W,H);g.fillStyle='#e8a8c0';g.beginPath();g.arc(W/2,52,26,0,7);g.fill();g.fillStyle='#1d1d1f';g.beginPath();g.arc(W/2-8,48,3,0,7);g.arc(W/2+8,48,3,0,7);g.fill();SH_TXT(g,'29',W/2,104,26,'#5a3a8a','900','serif');SH_TXT(g,'早午餐',W/2,136,18,'#5a3a8a');},0.5),'#f4f2f6',FE-0.95,FE-0.3);
+  VBOX(z1+0.3,GH+0.1,1.4,TXE(96,160,(g,W,H)=>{g.fillStyle='#f4f2f6';g.fillRect(0,0,W,H);g.fillStyle='#e8a8c0';g.beginPath();g.arc(W/2,52,26,0,7);g.fill();g.fillStyle='#1d1d1f';g.beginPath();g.arc(W/2-8,48,3,0,7);g.arc(W/2+8,48,3,0,7);g.fill();SH_TXT(g,'29',W/2,104,26,'#5a3a8a','900','serif');SH_TXT(g,'早午餐',W/2,136,18,'#5a3a8a');},0.5),'#f4f2f6',FE-0.65,FE);
   const OR=M('#c8602a');boxR(FE+2.35,FE+2.6,z1+0.4,z1+0.6,0.15,2.4,OR,{});boxR(FE+2.35,FE+2.6,z2-0.6,z2-0.4,0.15,2.4,OR,{});
   FP(zc-0.8,1.5,1.2,0.7,TXE(128,64,(g,W,H)=>{g.fillStyle='#f6efe0';g.fillRect(0,0,W,H);for(let i=0;i<4;i++){g.fillStyle=pick(['#d9a066','#c8602a','#e8c080']);g.fillRect(8+i*30,10,24,30);}SH_TXT(g,'早午餐',W/2,52,14,'#5a3a2a');},0.3),-2.45);};
  // 粥年興炒飯：橘色招牌＋黃條、紅色營業時間布條、橘色柱子
  D64.ze=o=>{const{z1,z2}=o,zc=(z1+z2)/2,w=z2-z1;const OR=M('#f2731e');
   boxR(FE-0.15,FE+0.5,z2-0.6,z2,0.15,GH-0.15,OR,{col:1});boxR(FE+2.3,FE+2.75,z1+w*0.5-0.25,z1+w*0.5+0.25,0.15,GH-0.15,OR,{col:1});
   FP(zc-0.5,2.65,w-2.4,0.55,TXE(512,48,(g,W,H)=>{g.fillStyle='#e02a2a';g.fillRect(0,0,W,H);SH_TXT(g,'・粥年興營業時間・',W/2,13,13,'#f6e04a');SH_TXT(g,'上午11:00～下午1:30　下午4:00～晚上9:00',W/2,33,17,'#fff');},0.4),-2.5);
-  VBOX(z1+0.4,0.9,1.6,TXE(64,192,(g,W,H)=>{g.fillStyle='#f6e04a';g.fillRect(0,0,W,H);for(let i=0;i<3;i++)SH_TXT(g,'海鮮粥'[i],W/2,34+i*60,40,'#c8302a');},0.4),'#f6e04a',FE-0.7,FE-0.2);
+  VBOX(z1+0.4,0.9,1.6,TXE(64,192,(g,W,H)=>{g.fillStyle='#f6e04a';g.fillRect(0,0,W,H);for(let i=0;i<3;i++)SH_TXT(g,'海鮮粥'[i],W/2,34+i*60,40,'#c8302a');},0.4),'#f6e04a',FE-0.5,FE);
   FP(z2-1.8,1.8,0.45,1.2,TXE(48,128,(g,W,H)=>{g.fillStyle='#f6e04a';g.fillRect(0,0,W,H);for(let i=0;i<3;i++)SH_TXT(g,'炒飯麵'[i],W/2,24+i*40,30,'#c8302a');},0.4),-2.45);};
  // 幼兒園（161）：白色矮牆＋藍綠藍拱形鐵窗、黑色鐵門「歡迎參觀」、紅色跑馬燈、二樓褪色壁畫
  D64.k161=o=>{const{z1,z2}=o,zc=(z1+z2)/2,w=z2-z1,top=roofY(o);const WW=M('#f2f0ea');const gz=z1+0.3,ge=z1+2.4;
@@ -5423,14 +5444,14 @@ const WH2={X:-318,FE:-307,FW:-329,AD:2.6,SD:9.6,BD:15,GH:3.54,shops:[]};
  D64.saw=o=>{const{z1,z2}=o,zc=(z1+z2)/2,w=z2-z1;FP(zc,GH+0.75,w-0.1,1.3,SAW);SIDEP(o,false,GH+0.75,6,1.3,SAW);
   const aw=new THREE.Mesh(new THREE.BoxGeometry(1.2,0.08,w-0.2),M('#2f8a4a'));aw.position.set(FE-0.4,GH-0.2,zc);aw.rotation.z=0.3;S.add(aw);
   FP(zc+0.5,2.55,w-2.2,0.75,TXE(256,64,(g,W,H)=>{g.fillStyle='#f4eef4';g.fillRect(0,0,W,H);g.fillStyle='#c8302a';g.fillRect(16,16,26,32);g.fillStyle='#2f8a4a';g.fillRect(42,16,10,32);SH_TXT(g,'中東',78,32,18,'#c8302a');SH_TXT(g,'莎威馬',170,32,40,'#1f5fa8');},0.4),-2.5);
-  VBOX(z1+0.4,0.4,2.6,TXE(64,224,(g,W,H)=>{g.fillStyle='#d42a2a';g.fillRect(0,0,W,H);for(let i=0;i<4;i++)SH_TXT(g,'莎威馬の'[i],W/2,30+i*48,36,'#fff');SH_TXT(g,'店',W/2,212,30,'#fff');},0.4),'#d42a2a',FE-0.75,FE-0.15);};
+  VBOX(z1+0.4,0.4,2.6,TXE(64,224,(g,W,H)=>{g.fillStyle='#d42a2a';g.fillRect(0,0,W,H);for(let i=0;i<4;i++)SH_TXT(g,'莎威馬の'[i],W/2,30+i*48,36,'#fff');SH_TXT(g,'店',W/2,212,30,'#fff');},0.4),'#d42a2a',FE-0.6,FE);};
  // 喜芝莓名品（141巷口另一邊轉角）：粉紅大招牌、BEAUTY BLOSSOMING、磚柱、櫥窗模特兒、IVMEEO 突出招牌
  const XZM=TXE(512,112,(g,W,H)=>{g.fillStyle='#d83a8a';g.fillRect(0,0,W,H);SH_TXT(g,'喜 芝 莓 名 品',W/2,46,58,'#fff');SH_TXT(g,'BEAUTY  BLOSSOMING',W/2,92,20,'#fbe0ee','800','sans-serif');},0.45);
  D64.xzm=o=>{const{z1,z2}=o,zc=(z1+z2)/2,w=z2-z1;FP(zc,GH+0.65,w-0.1,1.35,XZM);SIDEP(o,true,GH+0.65,6,1.35,XZM);
   for(const zz of[z1+0.35,zc,z2-0.35])boxR(FE-0.1,FE+0.5,zz-0.3,zz+0.3,0.15,GH-0.15,M('#9a5a44'),{col:1});
   for(let i=0;i<4;i++)MANN(FE+3.4,z1+1.0+i*(w-2)/3,pick(['#d83a5a','#2a3a5a','#e8e0d0','#3a6a8a']));
   const t=TXE(160,96,(g,W,H)=>{g.fillStyle='#c8307a';g.fillRect(0,0,W,H);g.strokeStyle='#fff';g.lineWidth=3;g.strokeRect(4,4,W-8,H-8);SH_TXT(g,'IVMEEO',W/2,30,22,'#fff','800','sans-serif');SH_TXT(g,'喜芝莓',W/2,66,32,'#fff');},0.45);
-  boxR(FE-1.7,FE-0.1,z1+0.4,z1+0.56,GH+2.3,0.95,[M('#c8307a'),M('#c8307a'),M('#c8307a'),M('#c8307a'),t,t],{cast:false});};
+  boxR(FE-1.6,FE,z1+0.4,z1+0.56,GH+2.3,0.95,[M('#c8307a'),M('#c8307a'),M('#c8307a'),M('#c8307a'),t,t],{cast:false});};
  // 維新診所：藍色招牌（H 標誌）、高高的藍色直立招牌、「感冒・腸胃炎」「高血壓・糖尿病」小直立牌
  D64.wx=o=>{const{z1,z2}=o,zc=(z1+z2)/2,w=z2-z1;FP(zc,GH+0.55,w-0.2,1.0,TXE(512,96,(g,W,H)=>{g.fillStyle='#f4f4f0';g.fillRect(0,0,W,H);g.fillStyle='#2a4ab0';g.fillRect(0,0,W,H-20);g.fillStyle='#fff';g.beginPath();g.arc(48,38,28,0,7);g.fill();SH_TXT(g,'H',48,40,34,'#2a9a4a','900','sans-serif');
    SH_TXT(g,'維新家庭醫學科診所',290,38,44,'#fff');SH_TXT(g,'(02)2857-2559',W-80,H-10,14,'#2a4ab0','800','sans-serif');},0.45));
@@ -5438,12 +5459,12 @@ const WH2={X:-318,FE:-307,FW:-329,AD:2.6,SD:9.6,BD:15,GH:3.54,shops:[]};
    g.save();g.translate(22,280);g.rotate(Math.PI/2);SH_TXT(g,'WELLSUN FAMILY CLINIC',0,0,18,'#fff','800','sans-serif');g.restore();SH_TXT(g,'(02)2857-2559',W/2,H-20,13,'#fff','800','sans-serif');},0.45),'#2a4ab0');
   for(const[zz,s]of[[z1+0.25,'感冒・腸胃炎'],[z2-0.25,'高血壓・糖尿病']])FP(zz,1.5,0.45,1.7,TXE(48,176,(g,W,H)=>{g.fillStyle='#2a4ab0';g.fillRect(0,0,W,H);g.strokeStyle='#fff';g.lineWidth=2;g.strokeRect(3,3,W-6,H-6);const t=s.replace('・','');for(let i=0;i<t.length;i++)SH_TXT(g,t[i],W/2,18+i*(150/t.length),20,'#fff');},0.35),0.0);
   const hm=TXE(64,64,(g,W,H)=>{g.fillStyle='#fff';g.fillRect(0,0,W,H);g.fillStyle='#2a9a4a';g.beginPath();g.arc(W/2,H/2,26,0,7);g.fill();SH_TXT(g,'H',W/2,H/2+2,34,'#fff','900','sans-serif');},0.5);
-  const hc=new THREE.Mesh(new THREE.CylinderGeometry(0.42,0.42,0.2,20),[M('#ddd'),hm,hm]);hc.rotation.x=Math.PI/2;hc.position.set(FE-0.7,GH-0.5,z2-0.3);S.add(hc);};
+  const hc=new THREE.Mesh(new THREE.CylinderGeometry(0.42,0.42,0.2,20),[M('#ddd'),hm,hm]);hc.rotation.x=Math.PI/2;hc.position.set(FE-0.43,GH-0.5,z2-0.3);S.add(hc);};
  // 甜不辣牛肉麵：白色書法招牌（Since 2011）、圓形橘色「甜不辣」燈箱、紅色直立招牌、紅布條
  D64.tbl=o=>{const{z1,z2}=o,zc=(z1+z2)/2,w=z2-z1;FP(zc,GH+0.55,w-0.2,1.0,TXE(512,96,(g,W,H)=>{g.fillStyle='#f6f4ee';g.fillRect(0,0,W,H);g.fillStyle='#e8782a';g.fillRect(0,H-16,W,16);g.font=`900 52px serif`;g.textAlign='center';g.textBaseline='middle';g.fillStyle='#1d1d1f';g.fillText('牛 肉 麵 ・ 甜 不 辣',W/2,40);SH_TXT(g,'Since 2011',W-60,H-8,11,'#fff','800','sans-serif');},0.4));
   const tm=TXE(128,128,(g,W,H)=>{g.fillStyle='#f6f4ee';g.fillRect(0,0,W,H);g.fillStyle='#e8642a';g.beginPath();g.arc(W/2,H/2,58,0,7);g.fill();for(let i=0;i<3;i++)SH_TXT(g,'甜不辣'[i],W/2,26+i*38,34,'#fff');},0.5);
-  const tc=new THREE.Mesh(new THREE.CylinderGeometry(0.85,0.85,0.3,24),[M('#f6f4ee'),tm,tm]);tc.rotation.x=Math.PI/2;tc.position.set(FE-0.95,GH+1.5,z2-0.5);S.add(tc);addLight(FE-1.6,GH+1.5,z2-0.5,'#ffd9a0',3,'sign');
-  VBOX(z2-0.35,0.9,2.3,TXE(64,224,(g,W,H)=>{g.fillStyle='#d42a2a';g.fillRect(0,0,W,H);SH_TXT(g,'宋',W/2,30,40,'#fff');for(let i=0;i<3;i++)SH_TXT(g,'牛肉麵'[i],W/2,90+i*44,34,'#fff');},0.4),'#d42a2a',FE-0.7,FE-0.15);
+  const tc=new THREE.Mesh(new THREE.CylinderGeometry(0.85,0.85,0.3,24),[M('#f6f4ee'),tm,tm]);tc.rotation.x=Math.PI/2;tc.position.set(FE-0.86,GH+1.5,z2-0.5);S.add(tc);addLight(FE-1.6,GH+1.5,z2-0.5,'#ffd9a0',3,'sign');
+  VBOX(z2-0.35,0.9,2.3,TXE(64,224,(g,W,H)=>{g.fillStyle='#d42a2a';g.fillRect(0,0,W,H);SH_TXT(g,'宋',W/2,30,40,'#fff');for(let i=0;i<3;i++)SH_TXT(g,'牛肉麵'[i],W/2,90+i*44,34,'#fff');},0.4),'#d42a2a',FE-0.55,FE);
   for(const[zz,t1]of[[zc-0.9,'套餐 105・185'],[zc+1.1,'多種飲料']])FP(zz,2.6,1.6,0.5,TXE(160,48,(g,W,H)=>{g.fillStyle='#d42a2a';g.fillRect(0,0,W,H);SH_TXT(g,t1,W/2,H/2+1,20,'#fff');},0.4),-2.5);};
  // 立方社區：水泥矮牆＋石牌＋花木
  D64.lif=o=>{const{z1,z2}=o,zc=(z1+z2)/2;boxR(FE-0.6,FE,z1+0.3,z2-1.8,0.15,1.3,M('#c9c4b8'),{col:1});FP(zc-0.6,0.9,1.4,0.6,TXE(128,56,(g,W,H)=>{g.fillStyle='#4a4e4c';g.fillRect(0,0,W,H);SH_TXT(g,'立 方',W/2,H/2+2,30,'#c9c4b8','900','serif');},0.2),0.62);
@@ -5463,7 +5484,7 @@ const WH2={X:-318,FE:-307,FW:-329,AD:2.6,SD:9.6,BD:15,GH:3.54,shops:[]};
   FP(zc,GH+0.85,w,1.4,TXE(256,112,(g,W,H)=>{g.fillStyle='#f6d8c8';g.fillRect(0,0,W,H);SH_TXT(g,'懷 念 台 南 鱔 魚 麵',W/2,16,18,'#d42a2a');const it=['鱔魚','花枝','蝦仁','招牌','牛肉','羊肉'];it.forEach((s,i)=>{for(let k=0;k<2;k++)SH_TXT(g,s[k],20+i*42,44+k*22,18,'#d42a2a');SH_TXT(g,'燴飯',20+i*42,96,12,'#d42a2a');});},0.4));
   VBOX(z2-0.3,GH+0.5,4.2,TXE(64,320,(g,W,H)=>{g.fillStyle='#f4f2ee';g.fillRect(0,0,W,H);for(let i=0;i<6;i++)SH_TXT(g,'懷念鱔魚麵'[i]||'',W/2,30+i*52,40,'#d42a2a');},0.4),'#f4f2ee');};
  D64.mk2=o=>{const{z1,z2}=o,zc=(z1+z2)/2,w=z2-z1;FP(zc,GH+0.6,w+0.2,1.2,TXE(512,112,(g,W,H)=>{g.fillStyle='#f2dc4a';g.fillRect(0,0,W,H);SH_TXT(g,'明逵書局',140,58,62,'#d42a2a');[['文','具','#2a8a4a'],['漫','畫','#e8502a'],['禮','品','#1f3a9a'],['玩','具','#d42a2a']].forEach(([a,b,c],i)=>{SH_TXT(g,a,316+i*50,34,40,c);SH_TXT(g,b,316+i*50,84,40,c);});},0.45));
-  FP(zc+0.4,GH+3.4,w+3,1.9,TXE(512,128,(g,W,H)=>{g.fillStyle='#7ac8d8';g.fillRect(0,0,W,H);g.fillStyle='#e8a0b8';g.fillRect(0,H-12,W,12);SH_TXT(g,'明逵圖書文化廣場',W/2,60,62,'#1d2a6a');},0.4),0.06);
+  FP(zc+0.2,GH+3.4,w+0.6,1.9,TXE(512,128,(g,W,H)=>{g.fillStyle='#7ac8d8';g.fillRect(0,0,W,H);g.fillStyle='#e8a0b8';g.fillRect(0,H-12,W,12);SH_TXT(g,'明逵圖書文化廣場',W/2,60,62,'#1d2a6a');},0.4),0.06);
   for(const[zz,t]of[[z1+1.2,'學生運動服'],[z2-1.2,'麻將大特價']])FP(zz,2.65,2.0,0.55,TXE(192,48,(g,W,H)=>{g.fillStyle='#e8302a';g.fillRect(0,0,W,H);SH_TXT(g,t,W/2,H/2+1,28,'#fff');},0.4),-0.4);};
  const HAO=TXE(512,144,(g,W,H)=>{g.fillStyle='#1d1d1f';g.fillRect(0,0,W,H);g.strokeStyle='#f2d21e';g.lineWidth=4;g.beginPath();g.arc(56,52,34,0,7);g.stroke();SH_TXT(g,'JScience',56,54,15,'#7ad0f0','800','sans-serif');SH_TXT(g,'皓葳文教',230,54,60,'#fff');SH_TXT(g,'三重五華旗艦校',430,34,18,'#fff');SH_TXT(g,'(02)2857-5252',430,70,20,'#fff','800','sans-serif');
    g.fillStyle='#f2d21e';g.fillRect(0,96,W,3);SH_TXT(g,'國中黑馬讀書班・高中菁英讀書會',W/2,120,30,'#fff');},0.4);
@@ -5490,18 +5511,18 @@ const WH2={X:-318,FE:-307,FW:-329,AD:2.6,SD:9.6,BD:15,GH:3.54,shops:[]};
    g.fillStyle='#e02a3a';g.beginPath();g.arc(70,62,30,0,7);g.fill();SH_TXT(g,'公益彩券',180,64,38,'#d42a2a');g.fillStyle='#d42a2a';g.beginPath();g.arc(330,62,30,0,7);g.fill();SH_TXT(g,'We',330,62,16,'#fff','800','sans-serif');SH_TXT(g,'台彎彩券',430,64,38,'#fff');},0.45));
   FP(zc,2.62,w-0.6,0.6,TXE(256,48,(g,W,H)=>{g.fillStyle='#f6a02a';g.fillRect(0,0,W,H);SH_TXT(g,'買運彩 看比賽 滿千即可兌換商品卡',W/2,H/2+1,17,'#c8202a');},0.4),-0.4);
   const rt=TXE(128,128,(g,W,H)=>{g.fillStyle='#fff';g.fillRect(0,0,W,H);g.fillStyle='#d42a2a';g.beginPath();g.arc(W/2,H/2,60,0,7);g.fill();SH_TXT(g,'台彎',W/2,44,34,'#fff');SH_TXT(g,'運彩',W/2,86,34,'#fff');},0.5);
-  const rc=new THREE.Mesh(new THREE.CylinderGeometry(0.9,0.9,0.25,24),[M('#fff'),rt,rt]);rc.rotation.x=Math.PI/2;rc.position.set(FE-1.0,GH+3.6,z2-0.4);S.add(rc);};
+  const rc=new THREE.Mesh(new THREE.CylinderGeometry(0.9,0.9,0.25,24),[M('#fff'),rt,rt]);rc.rotation.x=Math.PI/2;rc.position.set(FE-0.92,GH+3.6,z2-0.4);S.add(rc);};
  D64.yho=o=>{const{z1,z2}=o,zc=(z1+z2)/2,w=z2-z1;FP(zc,GH+0.6,w+0.2,1.2,TXE(512,112,(g,W,H)=>{g.fillStyle='#d8302a';g.fillRect(0,0,W,H);SH_TXT(g,'永 禾 豆 漿',W/2,42,58,'#fff');SH_TXT(g,'早點．宵夜／營業24小時',W/2,92,30,'#fff');},0.45));
   boxR(FE+0.7,FE+1.6,z1+0.6,z1+2.4,0.15,1.0,M('#b9bec2'),{col:1});cyl(FE+1.15,1.15,z1+1.0,0.3,0.28,0.4,M('#c9ccd0'),12);};
  // ---- V68 西側（門朝東）：富華街～碧華街（照 109/142/146/150/129/154/139）----
  const FPW=(z,y,w,h,mat,dx=0)=>vplane(FW+0.06+dx,y,z,w,h,mat,Math.PI/2);
- const VBOXW=(z,y0,len,vt,col,xa=FW+0.3,xb=FW+1.25)=>{const c=M(col);boxR(xa,xb,z-0.1,z+0.1,y0,len,[c,c,c,c,vt,vt],{cast:false});addLight((xa+xb)/2+0.6,y0+len/2,z,'#fff4dd',4,'sign');};
+ const VBOXW=(z,y0,len,vt,col,xa=FW,xb=FW+0.95)=>{const c=M(col);boxR(xa,xb,z-0.1,z+0.1,y0,len,[c,c,c,c,vt,vt],{cast:false});addLight((xa+xb)/2+0.6,y0+len/2,z,'#fff4dd',4,'sign');};
  const SIDEW=(o,south,y,w,h,mat)=>vplane(FW-w/2-0.2,y,south?o.z2+0.06:o.z1-0.06,w,h,mat,south?0:Math.PI);
  D64.mkx=o=>{const{z1,z2}=o,zc=(z1+z2)/2,w=z2-z1;const t=TXE(512,128,(g,W,H)=>{g.fillStyle='#2f6a3a';g.fillRect(0,0,W,H);for(let i=0;i<500;i++){g.fillStyle=pick(['#3f7a3a','#25582e','#4a8a44']);g.fillRect(rnd()*W,rnd()*H,4,3);}SH_TXT(g,'迷客廈',150,44,46,'#f4f4ee');SH_TXT(g,'Milk Shap',150,96,34,'#f4f4ee','900','sans-serif');SH_TXT(g,'牧場主題飲品',380,96,30,'#f4f4ee');},0.4);
   FPW(zc,GH+0.7,w+0.2,1.35,t);SIDEW(o,true,GH+0.7,6,1.35,t);FPW(zc,2.6,w-0.4,0.6,TXE(256,48,(g,W,H)=>{g.fillStyle='#4a90d8';g.fillRect(0,0,W,H);SH_TXT(g,'3.5～5.6 週年慶  週週抽 日本雙人來回機票',W/2,H/2+1,15,'#fff');},0.4),2.5);};
  D64.bls=o=>{const{z1,z2}=o,zc=(z1+z2)/2,w=z2-z1;FPW(zc,GH+0.8,w+0.4,1.5,TXE(512,144,(g,W,H)=>{g.fillStyle='#24418a';g.fillRect(0,0,W,H);g.strokeStyle='#e8e0c8';g.lineWidth=3;g.strokeRect(8,8,W-16,H-16);SH_TXT(g,"BLISS' PESTO",W/2,34,24,'#e8e0c8','900','serif');SH_TXT(g,'布莉斯義大利麵',W/2,78,50,'#f4f0e6');SH_TXT(g,'SPAGHETTI・RISOTTO・GRATIN・FRIES FOOD',W/2,120,15,'#e8e0c8','800','serif');},0.45));
   FPW(zc,2.65,w-0.6,0.45,TXE(256,32,(g,W,H)=>{g.fillStyle='#24418a';g.fillRect(0,0,W,H);SH_TXT(g,'布莉斯義大利麵',W/2,H/2+1,20,'#fff');},0.5),2.45);
-  boxR(FW+0.3,FW+1.5,z2-0.55,z2-0.4,GH+1.8,1.3,[M('#1d2a4a'),M('#1d2a4a'),M('#1d2a4a'),M('#1d2a4a'),TXE(96,96,(g,W,H)=>{g.fillStyle='#24418a';g.fillRect(0,0,W,H);g.fillStyle='#fff';g.beginPath();g.arc(W/2,44,22,0,7);g.fill();SH_TXT(g,'Pesto',W/2,46,14,'#24418a','900','serif');SH_TXT(g,'布莉斯',W/2,80,16,'#fff');},0.4),TXE(96,96,(g,W,H)=>{g.fillStyle='#24418a';g.fillRect(0,0,W,H);SH_TXT(g,'BLISS',W/2,48,22,'#fff','900','serif');},0.4)],{cast:false});};
+  boxR(FW,FW+1.2,z2-0.55,z2-0.4,GH+1.8,1.3,[M('#1d2a4a'),M('#1d2a4a'),M('#1d2a4a'),M('#1d2a4a'),TXE(96,96,(g,W,H)=>{g.fillStyle='#24418a';g.fillRect(0,0,W,H);g.fillStyle='#fff';g.beginPath();g.arc(W/2,44,22,0,7);g.fill();SH_TXT(g,'Pesto',W/2,46,14,'#24418a','900','serif');SH_TXT(g,'布莉斯',W/2,80,16,'#fff');},0.4),TXE(96,96,(g,W,H)=>{g.fillStyle='#24418a';g.fillRect(0,0,W,H);SH_TXT(g,'BLISS',W/2,48,22,'#fff','900','serif');},0.4)],{cast:false});};
  D64.cht=o=>{const{z1,z2}=o,zc=(z1+z2)/2,w=z2-z1;FPW(zc,GH+0.65,w+0.2,1.25,TXE(512,112,(g,W,H)=>{g.fillStyle='#f4f4f2';g.fillRect(0,0,W*0.62,H);['#f2a030','#f2d21e','#4aaa4a','#2a7ad8'].forEach((c,i)=>{g.fillStyle=c;g.fillRect(0,26+i*14,70,12);});g.fillStyle='#1f5fa8';g.beginPath();g.arc(110,56,26,0.5,Math.PI*1.8);g.lineWidth=8;g.strokeStyle='#1f5fa8';g.stroke();
    SH_TXT(g,'中華電訊',210,52,42,'#1f5fa8');SH_TXT(g,'Chunghwa Telecon',210,88,14,'#1f5fa8','800','sans-serif');g.fillStyle='#1f5fa8';g.fillRect(W*0.62,0,W*0.38,H);SH_TXT(g,'神瑙生活',W*0.81,56,38,'#fff');},0.45));
   VBOXW(z1+0.5,GH+1.8,5.4,TXE(112,480,(g,W,H)=>{g.fillStyle='#1f5fa8';g.fillRect(0,0,W,H);g.fillStyle='#f4f4f2';g.fillRect(0,0,W,140);for(let i=0;i<3;i++)SH_TXT(g,'華電信'[i],W/2,30+i*40,34,'#1f5fa8');SH_TXT(g,'senao',W/2,180,26,'#fff','900','sans-serif');for(let i=0;i<4;i++)SH_TXT(g,'神瑙數位'[i],W/2,230+i*56,46,'#fff');},0.45),'#1f5fa8');
@@ -5520,7 +5541,7 @@ const WH2={X:-318,FE:-307,FW:-329,AD:2.6,SD:9.6,BD:15,GH:3.54,shops:[]};
   const p=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,0.9,8),M('#f2a030'));p.position.set(FW+1.3,0.6,z1+0.2);S.add(p);};
  // 7-TEN 五華門市：樓上伊人坊、心算、蔬食環保招牌，2F 座位區
  D64.s7w=o=>{const{z1,z2}=o,zc=(z1+z2)/2;FPW(zc+1.5,GH+1.3,2.2,0.8,TXE(160,64,(g,W,H)=>{g.fillStyle='#f4f2c8';g.fillRect(0,0,W,H);g.fillStyle='#4a9a4a';g.beginPath();g.arc(30,30,18,0,7);g.fill();SH_TXT(g,'2F 座位區',100,34,22,'#2a5a2a');},0.4),0.02);
-  boxR(FW+0.3,FW+1.6,z2-0.5,z2-0.35,GH+3.6,1.0,[M('#8a1e4a'),M('#8a1e4a'),M('#8a1e4a'),M('#8a1e4a'),TXE(160,96,(g,W,H)=>{g.fillStyle='#8a1e4a';g.fillRect(0,0,W,H);SH_TXT(g,'伊人坊',W/2,38,34,'#fff');SH_TXT(g,'髮型沙龍',W/2,74,22,'#fff');},0.4),TXE(160,96,(g,W,H)=>{g.fillStyle='#8a1e4a';g.fillRect(0,0,W,H);SH_TXT(g,'伊人坊',W/2,48,34,'#fff');},0.4)],{cast:false});
+  boxR(FW,FW+1.3,z2-0.5,z2-0.35,GH+3.6,1.0,[M('#8a1e4a'),M('#8a1e4a'),M('#8a1e4a'),M('#8a1e4a'),TXE(160,96,(g,W,H)=>{g.fillStyle='#8a1e4a';g.fillRect(0,0,W,H);SH_TXT(g,'伊人坊',W/2,38,34,'#fff');SH_TXT(g,'髮型沙龍',W/2,74,22,'#fff');},0.4),TXE(160,96,(g,W,H)=>{g.fillStyle='#8a1e4a';g.fillRect(0,0,W,H);SH_TXT(g,'伊人坊',W/2,48,34,'#fff');},0.4)],{cast:false});
   VBOXW(z2-0.6,GH+4.8,3.6,TXE(96,320,(g,W,H)=>{g.fillStyle='#fff';g.fillRect(0,0,W,H);g.fillStyle='#2a9a5a';g.fillRect(4,4,W-8,H-8);SH_TXT(g,'心',W/2,70,70,'#fff');SH_TXT(g,'算',W/2,170,70,'#fff');SH_TXT(g,'教育部立案',W/2,250,14,'#fff');},0.4),'#2a9a5a');
   FPW(z2-1.8,GH+3.3,2.4,1.3,TXE(192,112,(g,W,H)=>{g.fillStyle='#f2d21e';g.fillRect(0,0,W,H);SH_TXT(g,'蔬食環保',W/2,24,26,'#c8302a');SH_TXT(g,'救地球',W/2,56,26,'#c8302a');SH_TXT(g,'浩瀚國術館',W/2,88,20,'#c8302a');},0.3),0.03);};
  D64.mmn=o=>{const{z1,z2}=o,zc=(z1+z2)/2,w=z2-z1;FPW(zc,GH+0.6,w+0.2,1.25,TXE(256,96,(g,W,H)=>{g.fillStyle='#eeedea';g.fillRect(0,0,W,H);g.font=`900 50px serif`;g.textAlign='center';g.textBaseline='middle';g.fillStyle='#8a8a90';g.fillText('滿滿牛肉麵',W/2,50);},0.4));
@@ -5547,6 +5568,58 @@ const WH2={X:-318,FE:-307,FW:-329,AD:2.6,SD:9.6,BD:15,GH:3.54,shops:[]};
   boxR(FW+0.55,FW+0.65,zA-0.6,zA+1.6,4.0,1.3,[sg,sg,M('#2a5aa0'),M('#2a5aa0'),M('#2a5aa0'),M('#2a5aa0')],{cast:false});
   {const st=new THREE.Mesh(new THREE.BoxGeometry(0.4,0.6,1.8),M('#2a8a4a'));st.position.set(FW+0.6,5.9,zA+0.5);S.add(st);}
   idle(xb+1.6,zA-0.8,-Math.PI/2,{style:'pony'});idle(xb+1.7,zA-1.6,-Math.PI/2,{});}
+ // ---- V69：富華街～93巷～87巷 東側（照 101/97/93/128/91/126/122 五華街）----
+ const ARM=(x0,x1,y,z)=>boxR(Math.min(x0,x1),Math.max(x0,x1),z-0.04,z+0.04,y-0.04,0.08,M('#6a6e72'),{cast:false});
+ const NZS=TXE(512,112,(g,W,H)=>{g.fillStyle='#d8202a';g.fillRect(0,0,W,H);SH_TXT(g,'nzs',90,56,62,'#fff','900','sans-serif');SH_TXT(g,'新姿生',260,54,66,'#fff');g.fillStyle='#fff';g.beginPath();g.arc(450,48,34,0,7);g.fill();g.fillStyle='#2a8ad8';g.beginPath();g.arc(450,48,29,0,7);g.fill();SH_TXT(g,'H',450,50,32,'#2a9a4a','900','sans-serif');SH_TXT(g,'新姿生五華大藥局',430,98,16,'#fff');},0.45);
+ D64.nzs=o=>{const{z1,z2}=o,zc=(z1+z2)/2,w=z2-z1;FP(zc,GH+0.65,w-0.1,1.4,NZS);SIDEP(o,true,GH+0.65,7,1.4,NZS);
+  SIDEP(o,true,GH+2.4,3.2,1.4,TXE(256,112,(g,W,H)=>{g.fillStyle='#e8302a';g.fillRect(0,0,W,H);SH_TXT(g,'EZ FITNES',W/2,34,36,'#fff','900','sans-serif');SH_TXT(g,'24H 健身房  TEL:2988-8368',W/2,80,16,'#fff');},0.4));
+  FP(zc,2.7,w-1.6,0.6,TXE(256,48,(g,W,H)=>{const gr=g.createLinearGradient(0,0,W,0);gr.addColorStop(0,'#e85a9a');gr.addColorStop(1,'#f6a02a');g.fillStyle=gr;g.fillRect(0,0,W,H);SH_TXT(g,'限時 超級快閃購',W/2,H/2+1,28,'#c8202a');},0.4),-2.5);
+  const cs=['#e63946','#f4a261','#f6d21e','#2a9d8f','#3a86ff','#9b5de5'];for(let i=0;i<18;i++){const a=i/17*Math.PI;const b=new THREE.Mesh(new THREE.SphereGeometry(0.13,8,6),M(cs[i%6]));b.position.set(FE+2.2,0.2+Math.sin(a)*2.3,zc+Math.cos(a)*1.2);S.add(b);}
+  boxR(FE-0.9,FE,z2-0.35,z2-0.2,GH+3.2,2.2,[M('#d8202a'),M('#d8202a'),M('#d8202a'),M('#d8202a'),TXE(96,224,(g,W,H)=>{g.fillStyle='#d8202a';g.fillRect(0,0,W,H);g.strokeStyle='#fff';g.lineWidth=5;g.strokeRect(6,6,W-12,H-12);SH_TXT(g,'藥',W/2,H/2,80,'#fff');},0.45),TXE(96,224,(g,W,H)=>{g.fillStyle='#d8202a';g.fillRect(0,0,W,H);SH_TXT(g,'藥',W/2,H/2,80,'#fff');},0.45)],{cast:false});};
+ D64.tw=o=>{const{z1,z2}=o,zc=(z1+z2)/2,w=z2-z1;FP(zc,GH+0.65,w-0.1,1.3,TXE(512,128,(g,W,H)=>{g.fillStyle='#d8b030';g.fillRect(0,0,W,H);g.fillStyle='#f8f8f6';g.fillRect(8,8,W-16,H-16);SH_TXT(g,'TRUE W',150,56,52,'#1d1d1f','900','sans-serif');g.strokeStyle='#d8b030';g.lineWidth=5;g.beginPath();g.arc(275,56,24,0,7);g.stroke();SH_TXT(g,'ON',340,56,52,'#1d1d1f','900','sans-serif');SH_TXT(g,'初韻',420,56,30,'#1d1d1f');SH_TXT(g,'幸韻・每一天  Your Luctea Day',W/2-20,100,18,'#3a3a3a','800','sans-serif');},0.45));
+  FP(zc,2.7,w-0.8,0.55,TXE(256,48,(g,W,H)=>{g.fillStyle='#c8402a';g.fillRect(0,0,W,H);SH_TXT(g,'致：冬天的你',W/2,H/2+1,26,'#fff');},0.4),-2.5);
+  const gd=TXE(128,128,(g,W,H)=>{g.fillStyle='#d8a828';g.beginPath();g.arc(64,64,62,0,7);g.fill();g.strokeStyle='#fff6d0';g.lineWidth=4;g.beginPath();g.arc(64,64,50,0,7);g.stroke();SH_TXT(g,'W',64,66,56,'#fff6d0','900','serif');},0.5);
+  const dc=new THREE.Mesh(new THREE.CylinderGeometry(0.75,0.75,0.18,24),[M('#d8a828'),gd,gd]);dc.rotation.x=Math.PI/2;dc.position.set(FE-0.8,GH+3.3,z1+0.6);S.add(dc);ARM(FE,FE-0.1,GH+3.3,z1+0.6);
+  const YF=M('#e8c030');for(const zz of[z1+0.9,z2-0.6])boxR(FE+2.4,FE+2.7,zz-0.06,zz+0.06,0.15,2.7,YF,{});};
+ D64.xs=o=>{const{z1,z2}=o,zc=(z1+z2)/2,w=z2-z1;FP(zc,GH+0.5,w+0.2,1.0,TXE(256,64,(g,W,H)=>{g.fillStyle='#f2eee4';g.fillRect(0,0,W,H);g.font=`900 44px serif`;g.textAlign='center';g.textBaseline='middle';g.fillStyle='#1d1d1f';g.fillText('小說漫畫',W/2,34);},0.3));
+  for(let i=0;i<16;i++){const b=new THREE.Mesh(new THREE.SphereGeometry(R(0.2,0.35),6,5),M(pick(['#4f8a3a','#3f7a3a','#6a9a4a'])));b.position.set(FE-0.15,GH-0.1-R(0,0.6),z1+0.2+i*(w-0.4)/15);S.add(b);}
+  FP(zc,1.55,w-1,2.8,TXE(128,128,(g,W,H)=>{g.fillStyle='#8a8478';g.fillRect(0,0,W,H);g.fillStyle='#6a665e';for(let y=0;y<H;y+=6)g.fillRect(0,y,W,2);},0.1),-2.45);};
+ D64.dyz=o=>{const{z1,z2}=o,zc=(z1+z2)/2,w=z2-z1;const LG=(g,x,y,s)=>{g.fillStyle='#f4f4f0';g.fillRect(x-s,y-s*0.3,s*2,s*1.3);g.fillStyle='#2a2a2a';g.beginPath();g.moveTo(x-s*1.15,y-s*0.2);g.lineTo(x,y-s*1.1);g.lineTo(x+s*1.15,y-s*0.2);g.lineTo(x+s*0.85,y-s*0.2);g.lineTo(x,y-s*0.8);g.lineTo(x-s*0.85,y-s*0.2);g.fill();g.fillStyle='#2a9a3a';g.beginPath();g.ellipse(x,y+s*0.3,s*0.35,s*0.2,-0.6,0,7);g.fill();};
+  FP(zc,GH+0.75,w-0.1,1.5,TXE(512,144,(g,W,H)=>{g.fillStyle='#3ab03a';g.fillRect(0,0,W,H);LG(g,110,84,46);SH_TXT(g,'大苑仔',320,78,78,'#fff');},0.45));
+  FP(zc+0.3,2.65,w-1.2,0.65,TXE(256,56,(g,W,H)=>{g.fillStyle='#e83a3a';g.fillRect(0,0,W,H);for(let i=0;i<10;i++){g.fillStyle='#c81e1e';g.beginPath();g.arc(rnd()*W,rnd()*H,7,0,7);g.fill();}SH_TXT(g,'嚐嚐 天然甜',W*0.38,28,24,'#fff');SH_TXT(g,'STRAWBERRY',W*0.78,26,14,'#fff','900','serif');},0.4),-2.5);
+  const sq=TXE(128,160,(g,W,H)=>{g.fillStyle='#3ab03a';g.fillRect(0,0,W,H);LG(g,W/2,64,34);SH_TXT(g,'大苑仔',W/2,124,30,'#fff');SH_TXT(g,'SINCE 2001',W/2,148,11,'#fff','800','sans-serif');},0.45);
+  boxR(FE-1.4,FE,z2-0.42,z2-0.25,GH+2.6,1.8,[M('#3ab03a'),M('#3ab03a'),M('#3ab03a'),M('#3ab03a'),sq,sq],{cast:false});
+  boxR(FE+1.6,FE+2.4,z2-1.3,z2-0.6,0.15,0.6,M('#7ad07a'),{col:1});};
+ D64.ld=o=>{const{z1,z2}=o,zc=(z1+z2)/2,w=z2-z1;FP(zc-0.6,GH-0.3,3.0,0.65,TXE(256,56,(g,W,H)=>{g.fillStyle='#f6d23a';g.fillRect(0,0,W,H);SH_TXT(g,'六堆小吃',W*0.36,28,34,'#c8302a');SH_TXT(g,'五華店',W*0.82,30,18,'#2a6a2a');},0.4),0.0);
+  const aw=new THREE.Mesh(new THREE.BoxGeometry(1.3,0.06,w*0.5),M('#e8d8b0'));aw.position.set(FE-0.5,GH-0.65,zc+w*0.2);aw.rotation.z=0.35;S.add(aw);
+  boxR(FE-0.9,FE+0.4,zc+0.2,zc+1.8,0.15,1.0,[M('#e8607a'),M('#e8607a'),M('#f6d23a'),M('#ddd'),M('#e8607a'),M('#e8607a')],{col:1});FP(zc+1.0,0.85,1.5,0.5,TXE(128,40,(g,W,H)=>{g.fillStyle='#f6d23a';g.fillRect(0,0,W,H);SH_TXT(g,'燒餅・油條',W/2,H/2+1,20,'#c8302a');},0.3),0.92);
+  VBOX(z1+0.5,GH+0.6,4.0,TXE(96,400,(g,W,H)=>{g.fillStyle='#f6d23a';g.fillRect(0,0,W,H);g.fillStyle='#d8302a';g.fillRect(8,8,W-16,H-16);for(let i=0;i<4;i++)SH_TXT(g,'中山口味'[i],W/2,60+i*88,64,'#f6e04a');},0.4),'#f6d23a');
+  {const t=new THREE.Mesh(new THREE.BoxGeometry(2.4,0.05,w),M('#c9c4b6'));t.position.set(FE-0.9,2.6,zc);t.rotation.z=0.12;S.add(t);}};
+ // 93巷以南：藏老滷（黑底金龍）、夾娃娃機＋開放居酒屋、OPPA 全正通訊、上虹小火鍋、麥當樂、日藥本鋪（87巷口）
+ D64.zl=o=>{const{z1,z2}=o,zc=(z1+z2)/2,w=z2-z1;const DR=TXE(512,192,(g,W,H)=>{g.fillStyle='#1a1a1c';g.fillRect(0,0,W,H);for(let y=0;y<H;y+=8){g.fillStyle='#232326';g.fillRect(0,y,W,3);}
+   for(const s of[-1,1]){const cx=W/2+s*190;g.strokeStyle='#c9a040';g.lineWidth=14;g.beginPath();g.moveTo(cx,20);g.bezierCurveTo(cx+s*40,60,cx-s*40,100,cx,140);g.bezierCurveTo(cx+s*30,170,cx-s*10,180,cx-s*20,186);g.stroke();g.fillStyle='#e8c050';g.beginPath();g.arc(cx,22,16,0,7);g.fill();}
+   g.fillStyle='#c9a040';g.fillRect(W/2-140,40,280,110);g.fillStyle='#d8202a';g.fillRect(W/2-132,48,264,94);SH_TXT(g,'藏老滷',W/2,96,72,'#f6e04a');},0.4);
+  FP(zc,GH+1.3,w-0.1,2.6,DR);SIDEP(o,false,GH+1.3,6,2.6,DR);FP(zc,1.6,w-0.6,2.9,TXE(128,128,(g,W,H)=>{g.fillStyle='#b8b0a0';g.fillRect(0,0,W,H);g.fillStyle='#9a9284';for(let y=0;y<H;y+=6)g.fillRect(0,y,W,2);},0.1),-2.45);};
+ D64.claw=o=>{const{z1,z2}=o,zc=(z1+z2)/2,w=z2-z1;for(let i=0;i<Math.floor((w-0.4)/0.9);i++){const z=z1+0.65+i*0.9;boxR(FE+0.6,FE+1.4,z-0.4,z+0.4,0.15,1.85,[M('#e85aa0'),M('#c8f0ff'),M('#f6a0d0'),M('#333'),M('#e85aa0'),M('#e85aa0')],{col:1,cast:false});}
+  addLight(FE+0.5,1.6,zc,'#e070ff',4,'sign');
+  FP(zc,GH+1.0,w+1.2,1.8,TXE(256,128,(g,W,H)=>{g.fillStyle='#14143a';g.fillRect(0,0,W,H);g.fillStyle='#e8602a';for(let i=0;i<12;i++){g.beginPath();g.arc(rnd()*W,rnd()*H*0.4,6,0,7);g.fill();}SH_TXT(g,'開放!',W*0.38,58,52,'#fff');SH_TXT(g,'五華店',W*0.82,24,16,'#fff');SH_TXT(g,'うようよ居酒屋',W*0.4,108,18,'#e83a3a');g.fillStyle='#ddd';g.beginPath();g.arc(W*0.82,74,26,0,7);g.fill();},0.4),0.05);};
+ D64.op=o=>{const{z1,z2}=o,zc=(z1+z2)/2,w=z2-z1;FP(zc,GH+0.85,w-0.1,1.7,TXE(512,160,(g,W,H)=>{g.fillStyle='#3a9a5a';g.fillRect(0,0,W,H);SH_TXT(g,'OPPA',W/2,72,110,'#f4f4f0','700','sans-serif');SH_TXT(g,'全正通訊',W-80,140,22,'#fff');},0.45));
+  FP(zc,2.5,w-1,0.75,TXE(256,64,(g,W,H)=>{g.fillStyle='#1d2a4a';g.fillRect(0,0,W,H);g.fillStyle='#eee';g.fillRect(10,8,110,48);SH_TXT(g,'新機上市',W*0.72,32,24,'#fff');},0.4),-2.5);
+  VBOX(z1+0.35,0.6,2.0,TXE(64,192,(g,W,H)=>{g.fillStyle='#d8302a';g.fillRect(0,0,W,H);for(let i=0;i<4;i++)SH_TXT(g,'專業包膜'[i],W/2,26+i*44,36,'#fff');},0.35),'#d8302a',FE-0.5,FE);};
+ D64.sh=o=>{const{z1,z2}=o,zc=(z1+z2)/2,w=z2-z1;FP(zc,GH+0.85,w+0.4,1.6,TXE(384,160,(g,W,H)=>{g.fillStyle='#e8b8d0';g.fillRect(0,0,W,H);g.fillStyle='#c890b0';g.fillRect(0,0,52,H);for(let i=0;i<5;i++)SH_TXT(g,'三重五華店'[i],26,18+i*30,22,'#6a2a4a');
+   g.font=`900 72px serif`;g.textAlign='center';g.textBaseline='middle';g.fillStyle='#3a1a2a';g.fillText('上虹',200,86);SH_TXT(g,'小火鍋',326,40,30,'#6a2a4a');SH_TXT(g,'外帶專線',326,130,14,'#6a2a4a');},0.45));};
+ D64.mcd=o=>{const{z1,z2}=o,zc=(z1+z2)/2,w=z2-z1;const DK=M('#2c2c30'),WT=M('#f2f2ee');
+  boxR(FE-0.35,FE+0.05,z1,z2,GH-0.6,0.6,WT,{});boxR(FE-0.35,FE+0.05,z1,z1+0.35,0.15,GH+3.6,WT,{col:1});boxR(FE-0.35,FE+0.05,z2-0.35,z2,0.15,GH+3.6,WT,{col:1});boxR(FE-0.36,FE+0.05,z1,z2,GH+3.4,0.4,WT,{});
+  FP(zc,GH+1.6,w-0.7,3.0,TXE(256,128,(g,W,H)=>{g.fillStyle='#2c2c30';g.fillRect(0,0,W,H);g.fillStyle='#3a3a40';g.fillRect(20,10,60,50);g.fillRect(100,10,60,50);g.fillRect(180,10,60,50);g.fillStyle='#1d1d20';g.fillRect(0,64,W,30);SH_TXT(g,'麥當樂',60,80,22,'#f2c12e');},0.35),0.4);
+  boxR(FE-0.1,FE+2.6,z1+0.35,z2-0.35,GH-0.62,0.02,DK,{});const rd=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.4,2.2),M('#d8202a'));rd.position.set(FE+0.2,GH-0.4,zc);S.add(rd);
+  boxR(FE+0.9,FE+2.6,z1+0.35,z2-0.35,0.15,0.08,M('#b8603a'),{cast:false});};
+ const RZ=TXE(512,112,(g,W,H)=>{g.fillStyle='#e5202e';g.fillRect(0,0,W,H);g.strokeStyle='#fff';g.lineWidth=4;g.strokeRect(24,22,64,64);SH_TXT(g,'日藥',56,42,20,'#fff');SH_TXT(g,'本鋪',56,68,20,'#fff');SH_TXT(g,'日藥本鋪',260,50,66,'#fff');SH_TXT(g,'JAPAN MEDICAL',260,96,16,'#fff','800','sans-serif');},0.45);
+ D64.rz=o=>{const{z1,z2}=o,zc=(z1+z2)/2,w=z2-z1;FP(zc,GH+0.65,w-0.1,1.35,RZ);SIDEP(o,true,GH+0.65,7,1.35,RZ);
+  FP(zc-0.4,2.65,w-1.6,0.6,TXE(256,48,(g,W,H)=>{g.fillStyle='#8a3ab0';g.fillRect(0,0,W,H);SH_TXT(g,'ECONECO 滿$588 送購物袋',W/2,H/2+1,18,'#f6e04a');},0.4),-2.5);
+  FP(zc+0.8,GH+3.9,3.0,0.7,RZ,0.02);
+  const DZ=TXE(192,224,(g,W,H)=>{g.fillStyle='#f6d21e';g.fillRect(0,0,W,H);g.strokeStyle='#fff';g.lineWidth=6;g.strokeRect(6,6,W-12,H-12);SH_TXT(g,'大家鍋',W/2,50,48,'#1f3aa0');SH_TXT(g,'100',W/2,140,96,'#e8302a','900','sans-serif');SH_TXT(g,'平價小火鍋',W/2,200,20,'#e8302a');},0.45);
+  boxR(FE-1.8,FE,z2-0.45,z2-0.3,GH+4.8,2.4,[M('#f6d21e'),M('#f6d21e'),M('#f6d21e'),M('#f6d21e'),DZ,DZ],{cast:false});
+  VBOX(z2-0.35,0.5,1.8,TXE(64,176,(g,W,H)=>{g.fillStyle='#e5202e';g.fillRect(0,0,W,H);SH_TXT(g,'藥',W/2,40,44,'#fff');SH_TXT(g,'88',W/2,120,40,'#f6e04a','900','sans-serif');},0.4),'#e5202e',FE-0.5,FE);};
  // 163 巷「御花苑」社區大門＋紅綠燈＋巷內機車
  function V64_after(){V68_corner();
   {const zc=-250,x0=FE+0.4,TT=M('#d8c8a0');for(const dz of[-2.7,2.7]){boxR(x0-0.4,x0+0.4,zc+dz-0.4,zc+dz+0.4,0.15,3.7,TT,{col:1});}
@@ -5576,10 +5649,12 @@ const WH2={X:-318,FE:-307,FW:-329,AD:2.6,SD:9.6,BD:15,GH:3.54,shops:[]};
   [89,42.5,[[8.5,'早點小籠包豆漿店','food','#c8302a','#fff','早餐・消夜・點心',{fl:5,fv:PINK2,band:'#1f5fa8',up:['勝學補習班','#2a8a4a','#fff']}],[6.5,'國晶眼鏡','optical','#1f6a3a','#f2d070','',{fl:6,fv:PINK,v:['國晶眼鏡','#1f6a3a','#f2d070']}],
    [5.5,'八方雲聚鍋貼','food','#f2c12e','#c8302a','鍋貼・水餃',{v:['八方雲聚','#f2c12e','#c8302a'],kit:1}],[5,'好寶手工饅頭','food','#f2e04a','#1f5fa8','',{}],[5.5,'上海排骨麵','food','#c8302a','#fff','排骨・牛肉麵',{}],
    [3.6,'公寓','door'],[9.5,'全佳 FamilyMark','conv','#ffffff','#0a74c9','',{fl:7,fv:PINK2,band:'#16a34a',band2:'#0a74c9',big:'五華大街'}]]],
-  [37.5,9.5,[[6.5,'日藥本鋪','pharm','#e5202e','#fff','藥妝・日本藥品',{fl:5,fv:PINK}],[9.5,'麥當樂','fast','#c8302a','#f2c12e','24 小時營業',{fl:5,fv:BROWN,dark:1}],[4.2,'上虹小火鍋','food','#c9a0c8','#c8302a','',{}],
-   [3.8,'OPPA 手機','phone','#2f8a4a','#fff','',{}],[3.6,'全正通訊','phone','#f2f2ee','#1f6a3a','門號申辦・續約',{v:['全正通訊','#fff','#c8302a']}],[3.9,'藏老滷','deli','#1d1d1f','#e8b62e','',{}]]],
-  [1.5,-37.5,[[5.5,'鬧熱牛肉麵','food','#1f3a8a','#fff','',{}],[6,'新姿生藥局','pharm','#e5202e','#fff','NZS',{}],[5.5,'TRUE WON 初韻','tea','#fff','#1d1d1f','手搖飲',{band:'#f2c12e'}],[3.6,'公寓','door'],
-   [6,'小說漫畫','books','#f4f4f2','#1d1d1f','租書・漫畫',{}],[7.5,'大苑仔','tea','#2a8a3a','#fff','水果茶',{fl:4,fv:WHITE}]]],
+  // V69：87巷～93巷（照 126/91/128 五華街）
+  [37.5,9.5,[[6.5,'日藥本鋪','pharm','#e5202e','#fff','藥妝・日本藥品',{fl:5,facm:CAGE,nosign:1,d64:'rz'}],[8.5,'麥當樂','fast','#2c2c30','#f2c12e','24 小時營業',{fl:5,fv:BROWN,dark:1,nosign:1,d64:'mcd'}],[4.2,'上虹小火鍋','food','#e8b8d0','#3a1a2a','',{fl:4,fv:BEIGE,nosign:1,d64:'sh'}],
+   [5.5,'OPPA 全正通訊','phone','#3a9a5a','#fff','門號申辦・續約',{fl:4,fv:BEIGE,nosign:1,d64:'op'}],[3.2,'夾娃娃機','door',0,0,'',{fl:4,fv:BEIGE,d64:'claw'}],[5,'藏老滷','deli','#1a1a1c','#f6e04a','',{fl:4,fv:BEIGE,nosign:1,d64:'zl'}]]],
+  // V69：93巷～富華街（照 93/97/101 五華街）
+  [1.5,-37.5,[[7,'新姿生藥局','pharm','#d8202a','#fff','NZS',{fl:5,facm:CAGE,nosign:1,d64:'nzs'}],[5,'TRUE WON 初韻','tea','#f8f8f6','#1d1d1f','手搖飲',{fl:4,facm:SPECK,nosign:1,d64:'tw'}],[5,'小說漫畫','books','#f2eee4','#1d1d1f','租書・漫畫',{fl:4,facm:SPECK,nosign:1,d64:'xs'}],
+   [2.6,'公寓','door',0,0,'',{fl:4,facm:SPECK}],[7,'大苑仔','tea','#3ab03a','#fff','水果茶',{fl:4,facm:SPECK,nosign:1,d64:'dyz'}],[7,'六堆小吃','food','#f6d23a','#c8302a','燒餅・油條',{fl:4,facm:SPECK,nosign:1,d64:'ld'}]]],
   // V68：富華街～富福街（照 Google 街景 43富福街／142／109）
   [-50.5,-81.5,[[5.5,'永禾豆漿','food','#d8302a','#fff','早點・宵夜・24小時',{fl:4,fv:BEIGE,nosign:1,d64:'yho'}],[6,'公益彩券・台彎彩券','lottery','#f2cc4a','#d42a2a','',{fl:4,facm:SPECK,nosign:1,d64:'lot'}],[4.5,'美滿檳榔','betel','#6aaee8','#d42a2a','',{fl:4,facm:SPECK,nosign:1,d64:'mm'}],
    [8,'耀華牙醫診所','clinic','#6a1e3a','#fff','SPARKLING DENTAL',{fl:4,facm:CREAM,dental:1,nosign:1,d64:'yhd'}],[7,'晨興藥局','pharm','#f0602a','#3aa04a','',{fl:5,facm:CREAM,nosign:1,d64:'cx'}]]],
@@ -5651,7 +5726,7 @@ const WH2={X:-318,FE:-307,FW:-329,AD:2.6,SD:9.6,BD:15,GH:3.54,shops:[]};
    {const SG=tex(1024,64,cfw.sign,false),sm=new THREE.MeshLambertMaterial({map:SG,emissive:0x444444,emissiveMap:SG});nightEmi(sm,0.7);const wm=M('#ffffff'),ms=[wm,wm,M('#e8e8e8'),M('#ccc'),wm,wm];ms[side>0?1:0]=sm;
     /*V67：只留店面那條招牌*/addLight(side>0?xF-1.4:xF+1.4,GH+0.4,zc,'#ffffff',5,'sign');
     const t=tex(128,256,(g,W,Hh)=>{g.fillStyle='#fff';g.fillRect(0,0,W,Hh);g.fillStyle=GN;g.fillRect(0,0,W,Hh*0.42);g.font='900 80px sans-serif';g.textAlign='center';g.fillStyle=OR;g.fillText('7',W/2,90);g.fillStyle='#1f4fa8';g.fillRect(0,Hh*0.45,W,Hh*0.55);g.fillStyle='#fff';g.font='900 22px sans-serif';g.fillText('ATM',W/2,Hh*0.62);g.fillText('☕  🍴',W/2,Hh*0.85);},false);
-    const m=new THREE.MeshLambertMaterial({map:t,emissive:0x333333,emissiveMap:t});const vz=side>0?z2-0.55:z1+0.55;boxR(side>0?xF-0.75:xF+0.05,side>0?xF-0.05:xF+0.75,vz-0.2,vz+0.2,GH+1.4,2.8,[m,m,M('#fff'),M('#fff'),m,m],{cast:false});addLight(side>0?xF-1.3:xF+1.3,GH+2.6,vz,'#ffffff',4,'sign');
+    const m=new THREE.MeshLambertMaterial({map:t,emissive:0x333333,emissiveMap:t});const vz=side>0?z2-0.55:z1+0.55;boxR(side>0?xF-0.7:xF,side>0?xF:xF+0.7,vz-0.2,vz+0.2,GH+1.4,2.8,[m,m,M('#fff'),M('#fff'),m,m],{cast:false});addLight(side>0?xF-1.3:xF+1.3,GH+2.6,vz,'#ffffff',4,'sign');
     const b=signMat('精品咖啡','#1d3a6e','#e8d6a8',true,0.4),px=side>0?xF-1.0:xF+1.0,pz=side>0?z1+1.2:z2-1.2;cyl(px,0.15,pz,0.03,0.03,2.6,M('#ccc'),5);vplane(px,1.6,pz+0.3,0.6,2,b,Math.PI/2);vplane(px,1.6,pz+0.3,0.6,2,b,-Math.PI/2);
     boxR(side>0?xF-1.6:xF+1.0,side>0?xF-1.0:xF+1.6,z1,z2,0.15,0.04,PAINT('#e8c23a'),{cast:false});}
    WH2.shops.push({n:o.n,x:side>0?FE+AD:FW-AD,z:zc,side});return;}
@@ -6043,7 +6118,7 @@ for(const id of['ttStart','ttDesign','ttDay'])document.getElementById(id).disabl
  * Audio starts ONLY after a user click (browser autoplay policy).
  * No licensed tracks or external media files.
  */
-const GAME_META={version:'V68',updated:'2026/11/28',feature:'五華街東側 惠文(149)～富華街口 照街景逐間重做（喜芝莓、維新診所、甜不辣、莎威馬、北海道拉麵、池上飯包、傑升通信、皓葳文教、明逵書局、台灣大哥哥、寶到眼鏡、晨興藥局、耀華牙醫、美滿檳榔、彩券行、永禾豆漿）'};
+const GAME_META={version:'V69',updated:'2026/11/28',feature:'五華街 87巷～富華街東側照街景（日藥本鋪、麥當樂、上虹、OPPA、藏老滷、新姿生、TRUE WON、小說漫畫、大苑仔、六堆小吃）／招牌貼牆不再飄在空中／路人頭上有對話框會講話'};
 window.GAME_META=GAME_META;
 document.getElementById('ttBuildVersion').textContent=GAME_META.version;
 document.getElementById('ttBuildDate').textContent='更新日期｜'+GAME_META.updated;
